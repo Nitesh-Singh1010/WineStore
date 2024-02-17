@@ -1,0 +1,19 @@
+{
+  "feature.app.serverException.message.text": "Oops, Something went wrong!<br />Please try again later",
+  "feature.app.uiException.message.text": "Oops, Something went wrong!<br />Please refresh manually or try again later",
+
+  "feature.loginPage.alert.incorrectInfo.message": "Incorrect username or password!!",
+  "feature.loginPage.alert.compulsoryInfo.message": "Both <b>username</b> & <b>password</b> are mandatory!!",
+
+  "feature.common.loader.uploadProgress.message": "{{percentCompleted}}% items fetched ...",
+  "feature.common.loader.processing.message": "Processing ...",
+
+  "feature.common.templates.loadingMessage.text": "Loading ...",
+  "feature.common.templates.popups.errorHeading.text": "Error",
+  "feature.common.templates.popups.info.dontShowAgain.text": "Do not show this again",
+  "feature.common.templates.popups.general.close.button": "Close",
+  "feature.common.templates.popups.general.cancel.button": "Cancel",
+  "feature.common.templates.popups.general.delete.button": "Delete",
+  "feature.common.templates.popups.general.apply.button": "Apply",
+  "feature.common.templates.popups.general.saveAndClose.button": "Save & Close"
+}

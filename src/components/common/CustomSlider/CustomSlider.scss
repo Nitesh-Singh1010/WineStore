@@ -1,0 +1,32 @@
+.slider-container {
+    padding: 0 0.725rem;
+    & > .slider-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        & > .title {
+            font-size: 0.9rem;
+        }
+        & > .MuiInput-root > input {
+            font-size: 0.725rem;
+            text-align: center;
+            padding: 0;
+        }
+        & > .title {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            & > button {
+                padding: 0;
+            }
+        }
+    }
+    & > span {
+        height: 2px;
+        padding: 0.1rem 0;
+        & > .MuiSlider-thumb {
+            width: 12px;
+            height: 12px;
+        }
+    }
+}

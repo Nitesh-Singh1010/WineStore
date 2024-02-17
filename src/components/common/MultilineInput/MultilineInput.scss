@@ -1,0 +1,38 @@
+.multiline-input-wrapper {
+    & > .label-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.2rem;
+        & > .title {
+            display: flex;
+            gap: 0.25rem;
+            align-items: center;
+            & > button {
+                padding: 0;
+            }
+        }
+        & > .action {
+            line-height: 1;
+            & > button {
+                padding: 0;
+            }
+        }
+    }
+    .MuiTextField-root {
+        width: 100%;
+        & > .MuiInputBase-root {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.8rem;
+            & > input::placeholder, textarea::placeholder {
+                opacity: 0.5;
+            }
+        }
+    }
+    & > .input-with-background > .MuiInputBase-root {
+        background-color: #e4e4e4;
+    }
+    & > .resizable > .MuiInputBase-root > .MuiInputBase-input {
+        resize: vertical;
+    }
+}

@@ -1,0 +1,13 @@
+.label-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    & > .title {
+        display: flex;
+        gap: 0.25rem;
+        align-items: center;
+        & > button {
+            padding: 0;
+        }
+    }
+}
