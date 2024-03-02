@@ -22,12 +22,14 @@
         "@emotion/styled": "^11.11.0",
         "@fontsource/roboto": "^5.0.8",
         "@mui/icons-material": "^5.15.10",
-        "@mui/material": "^5.15.10",
+        "@mui/material": "^5.15.11",
         "react": "^18.2.0",
         "react-app-polyfill": "^3.0.0",
         "react-dom": "^18.2.0",
+        "react-dropzone": "^14.2.3",
         "react-router-dom": "^6.22.1",
-        "resize-observer-polyfill": "^1.5.1"
+        "resize-observer-polyfill": "^1.5.1",
+        "uuid": "^9.0.1"
     },
     "devDependencies": {
         "@babel/core": "^7.23.9",
