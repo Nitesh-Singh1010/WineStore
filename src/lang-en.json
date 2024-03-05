@@ -1,6 +1,7 @@
 {
   "feature.app.serverException.message.text": "Oops, Something went wrong!<br />Please try again later",
   "feature.app.uiException.message.text": "Oops, Something went wrong!<br />Please refresh manually or try again later",
+  "feature.app.resetConfirmation.text" :"Are you sure you want to reset?",
 
   "feature.loginPage.alert.incorrectInfo.message": "Incorrect username or password!!",
   "feature.loginPage.alert.compulsoryInfo.message": "Both <b>username</b> & <b>password</b> are mandatory!!",
@@ -16,4 +17,5 @@
   "feature.common.templates.popups.general.delete.button": "Delete",
   "feature.common.templates.popups.general.apply.button": "Apply",
   "feature.common.templates.popups.general.saveAndClose.button": "Save & Close"
+  
 }

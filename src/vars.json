@@ -11,6 +11,8 @@
   "feature.fileUpload.allowedFileFormat.names": ".pdf, .txt",
   "feature.fileUpload.allowedTestFileFormat.names": "",
 
+  "feature.paymentModes":["Cash","Card","UPI"],
+
   "feature.userHistory.listItem.selectionLimit.value": null,
   "feature.userHistory.listItem.visibilityCount.value": 10,
 
@@ -58,5 +60,34 @@
 
   "feature.common.alert.autoCloseTimeout.short": 3000,
   "feature.common.alert.autoCloseTimeout.medium": 5000,
-  "feature.common.alert.autoCloseTimeout.large": 8000
+  "feature.common.alert.autoCloseTimeout.large": 8000,
+
+
+  "initialFormData": {
+    "customerName": "",
+    "salesOrderDate": "",
+    "itemRows": [],
+    "paymentMode": "",
+    "discountType": "",
+    "discountValue": 0,
+    "paidAmount": "",
+    "totalAmount": 0
+  },
+  "paymentModes": [
+    {"value": "Cash", "label": "Cash"},
+    {"value": "Card", "label": "Card"},
+    {"value": "UPI", "label": "UPI"}
+  ],
+  "discountTypes": [
+    {"value": "percentage", "label": "Percentage"},
+    {"value": "absolute", "label": "Absolute"}
+  ],
+  "labels": {
+    "salesOrderTitle": "Sales Order",
+    "customerName": "Customer's Name",
+    "salesOrderDate": "Sales Order Date",
+    "addItemButton": "Add Item",
+    "resetConfirmationTitle": "Confirmation",
+    "resetConfirmationContent": "Are you sure you want to reset the Order?"
+  }
 }
