@@ -26,6 +26,7 @@
         "react": "^18.2.0",
         "react-app-polyfill": "^3.0.0",
         "react-dom": "^18.2.0",
+        "react-dropzone": "^14.2.3",
         "react-router-dom": "^6.22.1",
         "resize-observer-polyfill": "^1.5.1"
     },
@@ -37,8 +38,8 @@
         "@babel/preset-typescript": "^7.23.3",
         "@babel/runtime": "^7.23.9",
         "@types/estree": "^1.0.5",
-        "@types/react": "^18.2.56",
-        "@types/react-dom": "^18.2.19",
+        "@types/react": "^18.2.63",
+        "@types/react-dom": "^18.2.20",
         "@types/react-router-dom": "^5.3.3",
         "@typescript-eslint/eslint-plugin": "^7.0.1",
         "@typescript-eslint/parser": "^7.0.1",
