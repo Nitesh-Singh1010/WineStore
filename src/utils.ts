@@ -496,3 +496,22 @@ export const parseTextFromHTML = (str: string): string => {
 export const removeHTMLTags = (str: string): string => {
   return str.replace(/<\/?[^>]+(>|$)/gi, '')
 }
+
+/** sorting logic of rows of a table*/
+export type Order = 'asc' | 'desc';
+
+export const getComparator = <Key extends keyof any>(
+  order: Order,
+  orderBy: Key,
+): ((a: { [key in Key]: number | string }, b: { [key in Key]: number | string }) => number) => {
+  return order === 'desc'
+    ? (a, b) => (b[orderBy] < a[orderBy] ? -1 : 1)
+    : (a, b) => (a[orderBy] < b[orderBy] ? -1 : 1);
+};
+
+
+/**date formatting, data transformation */
+export const formatDate = (date: Date): string => {
+  return date.toLocaleDateString(); // Customize as needed
+};
+
