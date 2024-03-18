@@ -7,10 +7,7 @@ import NotFound from '@components/NotFound'
 import { AppLangContext, AppStateContext } from '@Contexts'
 import baseVar from './vars.json'
 import baseLang from './lang-en.json'
-import Deposits from '@components/ReportsScreen/Deposits'
-import Receivables from '@components/ReportsScreen/Receivables'
-import Transactions from '@components/ReportsScreen/Transactions'
-import ReportsPage from '@components/ReportsScreen/ReportsPage'
+import Reports from '@components/ReportsScreen/Reports'
 
 export interface INavItem {
   disabled?: boolean
@@ -46,7 +43,7 @@ const App: React.FC = () => {
           <Router>
             <div className="app-container">
               <Routes>
-                <Route path="/" element={<ReportsPage />} />
+                <Route path="/" element={<Reports />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </div>

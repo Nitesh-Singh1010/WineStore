@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Typography, Select, MenuItem, Box } from '@mui/material'
+import { Typography, Select, MenuItem, Box, Button } from '@mui/material'
 import Transactions from './Transactions'
 import Receivables from './Receivables'
 import Deposits from './Deposits'
@@ -10,7 +10,7 @@ enum ReportType {
   Deposits = 'Deposits',
 }
 
-const ReportsPage: React.FC = () => {
+const Reports: React.FC = () => {
   const [selectedReport, setSelectedReport] = useState<ReportType | ''>('')
 
   const handleReportChange = (event: React.ChangeEvent<{ value: unknown }>) => {
@@ -41,7 +41,7 @@ const ReportsPage: React.FC = () => {
           onChange={handleReportChange}
           variant="outlined"
           style={{ width: 200 }}
-          displayEmpty 
+          displayEmpty
         >
           <MenuItem value="" disabled>
             Select Report
@@ -51,9 +51,24 @@ const ReportsPage: React.FC = () => {
           <MenuItem value={ReportType.Deposits}>Deposits</MenuItem>
         </Select>
       </Box>
-      {renderReportComponent()}
+      {selectedReport && (
+        <>
+          {renderReportComponent()}
+          <Button
+            variant="outlined"
+            style={{
+              cursor: 'pointer',
+              width: 'auto',
+              marginTop: '0.5rem',
+              marginRight: '0.5rem',
+            }}
+          >
+            Download Data
+          </Button>
+        </>
+      )}
     </Box>
   )
 }
 
-export default ReportsPage
+export default Reports
