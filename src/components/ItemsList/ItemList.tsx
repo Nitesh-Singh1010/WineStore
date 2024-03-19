@@ -22,62 +22,17 @@ import Button from '@mui/material/Button'
 import TextField from '@mui/material/TextField'
 import FilterListIcon from '@mui/icons-material/FilterList'
 import { visuallyHidden } from '@mui/utils'
+import {ItemListData,descendingComparator,Order,getComparator,stableSort} from '../../utils'
 
-interface Data {
-  id: number
-  itemName: string
-  costPrice: number
-  sellingPrice: number
-  quantity: number
-}
-
-function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
-  if (b[orderBy] < a[orderBy]) {
-    return -1
-  }
-  if (b[orderBy] > a[orderBy]) {
-    return 1
-  }
-  return 0
-}
-
-type Order = 'asc' | 'desc'
-
-function getComparator<Key extends keyof any>(
-  order: Order,
-  orderBy: Key
-): (
-  a: { [key in Key]: number | string },
-  b: { [key in Key]: number | string }
-) => number {
-  return order === 'desc'
-    ? (a, b) => descendingComparator(a, b, orderBy)
-    : (a, b) => -descendingComparator(a, b, orderBy)
-}
-
-function stableSort<T>(
-  array: readonly T[],
-  comparator: (a: T, b: T) => number
-) {
-  const stabilizedThis = array.map((el, index) => [el, index] as [T, number])
-  stabilizedThis.sort((a, b) => {
-    const order = comparator(a[0], b[0])
-    if (order !== 0) {
-      return order
-    }
-    return a[1] - b[1]
-  })
-  return stabilizedThis.map((el) => el[0])
-}
 
 interface HeadCell {
   disablePadding: boolean
-  id: keyof Data
+  id: keyof ItemListData
   label: string
   numeric: boolean
 }
 const headCells: readonly {
-  id: keyof Data
+  id: keyof ItemListData
   numeric: boolean
   disablePadding: boolean
   label: string
@@ -86,7 +41,7 @@ const headCells: readonly {
     id: 'itemName',
     numeric: false,
     disablePadding: false,
-    label: 'Item Names',
+    label: 'Item Name',
   },
   {
     id: 'costPrice',
@@ -107,7 +62,7 @@ interface EnhancedTableProps {
   numSelected: number
   onRequestSort: (
     event: React.MouseEvent<unknown>,
-    property: keyof Data
+    property: keyof ItemListData
   ) => void
   onSelectAllClick: (event: React.ChangeEvent<HTMLInputElement>) => void
   order: Order
@@ -124,7 +79,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
     onRequestSort,
   } = props
   const createSortHandler =
-    (property: keyof Data) => (event: React.MouseEvent<unknown>) => {
+    (property: keyof ItemListData) => (event: React.MouseEvent<unknown>) => {
       onRequestSort(event, property)
     }
 
@@ -231,12 +186,12 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
 
 export default function ItemList() {
   const [order, setOrder] = React.useState<Order>('asc')
-  const [orderBy, setOrderBy] = React.useState<keyof Data>('sellingPrice')
+  const [orderBy, setOrderBy] = React.useState<keyof ItemListData>('sellingPrice')
   const [selected, setSelected] = React.useState<readonly number[]>([])
   const [page, setPage] = React.useState(0)
   const [dense, setDense] = React.useState(false)
   const [rowsPerPage, setRowsPerPage] = React.useState(5)
-  const [rows, setRows] = React.useState<Data[]>([
+  const [rows, setRows] = React.useState<ItemListData[]>([
     {
       id: 1,
       itemName: 'Item 1',
@@ -289,9 +244,9 @@ export default function ItemList() {
   ])
 
   const [open, setOpen] = React.useState(false)
-  const [selectedRow, setSelectedRow] = React.useState<Data | null>(null)
-  const [editedItem, setEditedItem] = React.useState<Data | null>(null)
-  const [filteredRows, setFilteredRows] = React.useState<Data[]>(rows)
+  const [selectedRow, setSelectedRow] = React.useState<ItemListData | null>(null)
+  const [editedItem, setEditedItem] = React.useState<ItemListData | null>(null)
+  const [filteredRows, setFilteredRows] = React.useState<ItemListData[]>(rows)
 
   React.useEffect(() => {
     setFilteredRows(rows)
@@ -369,7 +324,7 @@ export default function ItemList() {
     [order, orderBy, page, rowsPerPage, filteredRows]
   )
 
-  const handleEditClick = (row: Data) => {
+  const handleEditClick = (row: ItemListData) => {
     setSelectedRow(row)
     setEditedItem({ ...row })
     setOpen(true)
@@ -474,7 +429,7 @@ export default function ItemList() {
           </Table>
         </TableContainer>
         <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
+            rowsPerPageOptions={[5, 10, 25]}
           component="div"
           count={filteredRows.length}
           rowsPerPage={rowsPerPage}

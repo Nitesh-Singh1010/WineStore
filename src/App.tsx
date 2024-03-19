@@ -7,9 +7,9 @@ import NotFound from '@components/NotFound'
 import { AppLangContext, AppStateContext } from '@Contexts'
 import baseVar from './vars.json'
 import baseLang from './lang-en.json'
-import ItemsScreen from '@components/Items/ItemsScreen'
-import ItemList from '@components/Items/ItemList'
-import ManualAdditionComponent from '@components/Items/ManualAdditionComponent'
+import ItemsScreen from '@components/ItemsScreen'
+import ItemList from '@components/ItemsList/ItemList'
+import ManualAdditionComponent from '@components/Items/ItemAddition/ManualAddition/ManualAdditionComponent'
 import { Inventory } from '@mui/icons-material'
 
 export interface INavItem {
@@ -46,7 +46,7 @@ const App: React.FC = () => {
           <Router>
             <div className="app-container">
               <Routes>
-                <Route path="/" element={<ItemsScreen/>} />
+                <Route path="/" element={<ItemList/>} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </div>

@@ -9,8 +9,8 @@ import {
 } from '@mui/material'
 
 
-import ManualAdditionComponent from './ManualAdditionComponent'
-import BulkUploadComponent from './BulkUploadComponent'
+import ManualAdditionComponent from './ItemAddition/ManualAddition/ManualAdditionComponent'
+import BulkUploadComponent from './ItemAddition/BulkUpload/BulkUploadComponent'
 
 const ItemsScreen: React.FC = () => {
   const [selectedValue, setSelectedValue] = useState<string>('manual')

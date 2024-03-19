@@ -5,7 +5,11 @@
   "feature.mlService.api.timeout_error_codes": [502, 504, 499],
 
   "feature.api.serverError.alert.autoCloseTimeout": 8000,
+  "feature.rowsPerPageOptions": [5, 10, 25],
 
+    "feature.quantity.units": ["L", "ml", "Kg", "g"],
+  
+  
   "feature.fileUpload.allowedFileSizeInMB.max": 2,
   "feature.fileUpload.allowedFilesCount.max": 5,
   "feature.fileUpload.allowedFileFormat.names": ".pdf, .txt",

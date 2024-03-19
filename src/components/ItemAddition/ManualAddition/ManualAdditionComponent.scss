@@ -1,0 +1,25 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+.quantity-column {
+    display: flex;
+    justify-content: space-between;
+  }
+  .add-item-button-container {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+  }
+  
+  
+  .add-item-button {
+    margin-top: 10px;
+  }
+  
+  
+  .add-inventory-button {
+    margin-left: 10px;
+  }
+  
