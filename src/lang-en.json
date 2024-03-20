@@ -8,6 +8,24 @@
   "feature.common.loader.uploadProgress.message": "{{percentCompleted}}% items fetched ...",
   "feature.common.loader.processing.message": "Processing ...",
 
+  "features.common.purchaseMessages":{
+    "confirmation": "Confirmation",
+    "resetPurchaseConfirmation": "Are you sure you want to reset the purchase?",
+    "draftDialogTitle": "View Drafts",
+    "totalAmountLabel":"Total Amount : Rs.",
+    "itemDetail":"Item Detail",
+    "quantity":"Quantity",
+    "purchasePrice":"Purchase Price",
+    "sellingPrice":"Selling Price",
+    "total":"Total",
+    "action":"Action",
+    "paymentMode":"Payment Mode",
+    "cash":"Cash",
+    "card":"Card",
+    "upi":"UPI"
+  },
+  
+
   "feature.common.templates.loadingMessage.text": "Loading ...",
   "feature.common.templates.popups.errorHeading.text": "Error",
   "feature.common.templates.popups.info.dontShowAgain.text": "Do not show this again",

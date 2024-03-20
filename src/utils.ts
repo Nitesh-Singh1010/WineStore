@@ -461,3 +461,9 @@ export const parseTextFromHTML = (str: string): string => {
 export const removeHTMLTags = (str: string): string => {
   return str.replace(/<\/?[^>]+(>|$)/gi, '')
 }
+
+
+// Funtion to calculate Total Amount 
+export const calculateTotalAmount = (itemRows: ItemRow[], discountValue: number) => {
+  return itemRows.reduce((acc, curr) => acc + curr.total, 0) - discountValue;
+}
