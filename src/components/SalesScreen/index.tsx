@@ -2,11 +2,6 @@ import React, { useState, useEffect } from 'react'
 import {
   Box,
   Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
   FormControl,
   Grid,
   InputLabel,
@@ -31,6 +26,8 @@ import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
 import lang from '../../lang-en.json'
 import vars from '../../vars.json'
 import './index.scss'
+import ResetConfirmationDialog from '@components/common/ResetConfirmationDialog/ResetConfirmationDialog'
+import DraftsDialog from '../common/DraftsDialog/DraftsDialog'
 
 interface ItemRow {
   id: number
@@ -106,7 +103,24 @@ const SalesScreen: React.FC = () => {
       itemRows: prevState.itemRows.filter((row) => row.id !== id),
     }))
 
-    setIdCounter((prevCounter) => prevCounter - 1) // Decrement the counter
+    setIdCounter((prevCounter) => prevCounter - 1) // Decrementing the counter
+  }
+  const handleResetConfirmationClose = () => {
+    setOpenResetConfirmation(false)
+  }
+
+  const handleResetConfirmationConfirm = () => {
+    setOpenResetConfirmation(false)
+    setFormData(initialFormData)
+  }
+  const handleDraftsModalClose = () => {
+    setOpenDraftsModal(false)
+  }
+
+  const deleteDraft = (index: number) => {
+    const updatedDrafts = [...drafts]
+    updatedDrafts.splice(index, 1)
+    setDrafts(updatedDrafts)
   }
 
   const handleItemChange = (
@@ -164,55 +178,18 @@ const SalesScreen: React.FC = () => {
     } else if (formData.discountType === 'absolute') {
       discountedTotal -= formData.discountValue
     }
-    console.log('Total after discount:', discountedTotal)
-    console.log(formData)
+    // console.log('Total after discount:', discountedTotal)
+    // console.log(formData)
     // Logic to send formData to the backend
   }
 
   const saveAsDraft = () => {
-    // Store customer name in local storage
+    // Storing customer name in local storage
     // localStorage.setItem('customerName', formData.customerName)
 
     setDrafts([...drafts, formData])
     setFormData(initialFormData) // Resetting the form data to initial state
   }
-  const deleteDraft = (index) => {
-    const updatedDrafts = [...drafts]
-    updatedDrafts.splice(index, 1) // Remove the draft at the specified index
-    setDrafts(updatedDrafts) // Update the state
-    localStorage.setItem('drafts', JSON.stringify(updatedDrafts)) // Update local storage
-  }
-  const renderDrafts = () => (
-    <Dialog open={openDraftsModal} onClose={() => setOpenDraftsModal(false)}>
-      <DialogTitle>Drafts</DialogTitle>
-      <DialogContent>
-        <DialogContentText>
-          {lang['feature.salesScreen.hardTexts'].selectDraftMessage}
-        </DialogContentText>
-        <List>
-          {drafts.map((draft, index) => (
-            <ListItem
-              key={index}
-              secondaryAction={
-                <IconButton
-                  edge="end"
-                  aria-label="delete"
-                  onClick={() => deleteDraft(index)}
-                >
-                  <DeleteIcon />
-                </IconButton>
-              }
-            >
-              <ListItemText primary={draft.customerName} />
-            </ListItem>
-          ))}
-        </List>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={() => setOpenDraftsModal(false)}>Close</Button>
-      </DialogActions>
-    </Dialog>
-  )
   const handlePrintBill = () => {
     alert('Printing Bill...')
   }
@@ -264,15 +241,25 @@ const SalesScreen: React.FC = () => {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell width="50%">Item Detail</TableCell>
-                <TableCell>Quantity</TableCell>
-                <TableCell>Rate</TableCell>
-                <TableCell>Total</TableCell>
-                <TableCell>Action</TableCell>
+                <TableCell width="50%">
+                  {lang['feature.salesScreen.hardTexts'].itemDetailColumnName}
+                </TableCell>
+                <TableCell>
+                  {lang['feature.salesScreen.hardTexts'].quantityColumnName}
+                </TableCell>
+                <TableCell>
+                  {lang['feature.salesScreen.hardTexts'].rateColumnName}
+                </TableCell>
+                <TableCell>
+                  {lang['feature.salesScreen.hardTexts'].totalColumnName}
+                </TableCell>
+                <TableCell>
+                  {lang['feature.salesScreen.hardTexts'].actionColumnName}
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {formData.itemRows.map((row,index) => (
+              {formData.itemRows.map((row, index) => (
                 <TableRow key={`${row.id}-${index}`}>
                   <TableCell>
                     <TextField
@@ -345,7 +332,7 @@ const SalesScreen: React.FC = () => {
             <Select
               labelId="payment-mode-label"
               value={formData.paymentMode}
-              label="Payment Mode"
+              label={lang['feature.salesScreen.hardTexts'].paymentModeLabel}
               onChange={(e) =>
                 setFormData({ ...formData, paymentMode: e.target.value })
               }
@@ -402,7 +389,7 @@ const SalesScreen: React.FC = () => {
         <Grid item xs={12} md={6}>
           <TextField
             fullWidth
-            label="Paid Amount"
+            label={lang['feature.salesScreen.hardTexts'].paidAmountLabel}
             value={formData.paidAmount}
             onChange={(e) =>
               setFormData({ ...formData, paidAmount: e.target.value })
@@ -411,18 +398,13 @@ const SalesScreen: React.FC = () => {
           />
         </Grid>
         <Grid item xs={12} md={6}>
-          <Typography
-            variant="h6"
-            fontWeight="bold"
-            textAlign={'center'}
-            my={5}
-          >
+          <Typography variant="h6" my={5} className="totalAmount">
             {lang['feature.salesScreen.hardTexts'].totalAmountLabel}{' '}
             {(totalAmount - formData.discountValue).toFixed(2)}
           </Typography>
         </Grid>
         <Grid item xs={12}>
-          <Box display="flex" justifyContent="flex-end" marginBottom={4}>
+          <Box className="buttonBox">
             <Button
               onClick={handlePrintBill}
               variant="contained"
@@ -457,38 +439,17 @@ const SalesScreen: React.FC = () => {
           </Box>
         </Grid>
       </Grid>
-      <Dialog
+      <ResetConfirmationDialog
         open={openResetConfirmation}
-        onClose={() => setOpenResetConfirmation(false)}
-      >
-        <DialogTitle>
-          {lang['feature.salesScreen.hardTexts'].resetConfirmationTitle}
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            {lang['feature.salesScreen.hardTexts'].resetConfirmationMessage}
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={() => {
-              setOpenResetConfirmation(false)
-              setFormData(initialFormData)
-              setFiles([]) // Reset the files state
-            }}
-            color="primary"
-          >
-            {lang['feature.salesScreen.hardTexts'].yesButton}
-          </Button>
-          <Button
-            onClick={() => setOpenResetConfirmation(false)}
-            color="primary"
-          >
-            {lang['feature.salesScreen.hardTexts'].cancelButton}
-          </Button>
-        </DialogActions>
-      </Dialog>
-      {renderDrafts()}
+        onClose={handleResetConfirmationClose}
+        onConfirm={handleResetConfirmationConfirm}
+      />
+      <DraftsDialog
+        open={openDraftsModal}
+        onClose={handleDraftsModalClose}
+        drafts={drafts}
+        deleteDraft={deleteDraft}
+      />
     </Box>
   )
 }

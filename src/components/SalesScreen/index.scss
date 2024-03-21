@@ -4,3 +4,18 @@
     align-items: center;
 }
 
+.totalAmount{
+   font-weight: bold;
+   text-align: center;
+}
+
+.buttonBox{
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 2rem;
+}
+
+.printButton{
+    margin-top: 1rem;
+    margin-right: 1rem;
+}

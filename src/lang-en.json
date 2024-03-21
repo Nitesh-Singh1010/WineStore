@@ -28,7 +28,12 @@
     "yesButton": "Yes",
     "cancelButton": "Cancel",
     "draftsTitle": "Drafts",
-    "selectDraftMessage": "Select a draft to load or delete it."
+    "selectDraftMessage": "Select a draft to load or delete it.",
+    "itemDetailColumnName":"Item Detail",
+    "quantityColumnName":"Quantity",
+    "rateColumnName":"Rate",
+    "totalColumnName":"Total",
+    "actionColumnName":"Action"
   },
   "feature.common.loader.uploadProgress.message": "{{percentCompleted}}% items fetched ...",
   "feature.common.loader.processing.message": "Processing ...",
