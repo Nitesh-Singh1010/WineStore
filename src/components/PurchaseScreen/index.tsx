@@ -1,11 +1,6 @@
 import {
   Box,
   Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
   FormControl,
   Grid,
   Paper,
@@ -13,6 +8,7 @@ import {
   InputLabel,
   MenuItem,
   Select,
+  ListItemSecondaryAction,
   Table,
   TableBody,
   TableCell,
@@ -29,11 +25,12 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import { v4 as uuidv4 } from 'uuid'
-import { useDropzone } from 'react-dropzone'
 import React, { useState, useCallback } from 'react'
 import { SelectChangeEvent } from '@mui/material/Select'
 import FileUpload from './FileUpload'
 import './index.scss'
+import ResetConfirmationDialog from '@components/common/ResetConfirmationDialog/ResetConfirmationDialog'
+import DraftsDialog from '@components/PurchaseScreen/DraftsDialog'
 import { calculateTotalAmount } from '../../utils'
 import langEN from '../../lang-en.json'
 interface ItemRow {
@@ -45,7 +42,7 @@ interface ItemRow {
   total: number
 }
 
-interface FormData {
+export interface FormData {
   vendorName: string
   purchaseDate: string
   itemRows: ItemRow[]
@@ -72,6 +69,7 @@ const PurchaseScreen: React.FC = () => {
   const [formData, setFormData] = useState<FormData>(initialFormData)
   const [files, setFiles] = useState<File[]>([])
   const [openResetConfirmation, setOpenResetConfirmation] = useState(false)
+  const [openDraftsModal, setOpenDraftsModal] = useState(false)
   const [drafts, setDrafts] = useState<FormData[]>([]) // State to store drafts
 
   const onDrop = useCallback(
@@ -80,14 +78,6 @@ const PurchaseScreen: React.FC = () => {
     },
     [files]
   )
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: {
-      'image/*': ['.jpeg', '.png', '.gif', '.bmp'],
-      'application/pdf': ['.pdf'],
-    },
-  })
-
   const addItemRow = () => {
     setFormData((prevState) => ({
       ...prevState,
@@ -143,7 +133,7 @@ const PurchaseScreen: React.FC = () => {
   const handleDiscountTypeChange = (
     event: React.ChangeEvent<{ value: unknown }>
   ) => {
-    const discountType: string = event.target.value as string // Ensure discountType is of type string
+    const discountType: string = event.target.value as string
     setFormData((prevState) => ({
       ...prevState,
       discountType,
@@ -173,27 +163,30 @@ const PurchaseScreen: React.FC = () => {
     // Logic to send formData to the backend
   }
 
-  const saveAsDraft = () => {
-    setDrafts([...drafts, formData]) // Saving current form data as a draft
-    // Sending formData to backend for saving draft by writing backend logic
+  const handleResetConfirmationClose = () => {
+    setOpenResetConfirmation(false)
   }
 
-  const renderDrafts = () => (
-    <Dialog open={true} onClose={() => {}}>
-      <DialogTitle>
-        {langEN['features.common.purchaseMessages'].draftDialogTitle}
-      </DialogTitle>
-      <DialogContent>
-        <List>
-          {drafts.map((draft, index) => (
-            <ListItem key={index}>
-              <ListItemText primary={draft.vendorName} />
-            </ListItem>
-          ))}
-        </List>
-      </DialogContent>
-    </Dialog>
-  )
+  const handleResetConfirmationConfirm = () => {
+    setOpenResetConfirmation(false)
+    setFormData(initialFormData)
+  }
+  const handleDraftsModalClose = () => {
+    setOpenDraftsModal(false)
+  }
+
+  const deleteDraft = (index: number) => {
+    const updatedDrafts = [...drafts]
+    updatedDrafts.splice(index, 1)
+    setDrafts(updatedDrafts)
+  }
+
+  const saveAsDraft = () => {
+    const draftWithVendor = { ...formData, vendorName: formData.vendorName }
+    setDrafts([...drafts, draftWithVendor]) // Saving current form data as a draft
+    // Sending formData to backend for saving draft by writing backend logic
+    setFormData(initialFormData) // Resetting the form data to initial state
+  }
 
   const renderFileNames = () => (
     <List>
@@ -216,7 +209,7 @@ const PurchaseScreen: React.FC = () => {
         <Typography variant="h4" component="h1">
           Make a purchase
         </Typography>
-        <IconButton onClick={renderDrafts}>
+        <IconButton onClick={() => setOpenDraftsModal(true)}>
           <ArrowDropDownIcon />
           <Typography>View Drafts</Typography>
         </IconButton>
@@ -362,7 +355,9 @@ const PurchaseScreen: React.FC = () => {
       <Grid container spacing={3}>
         <Grid item xs={12} md={6}>
           <FormControl fullWidth margin="normal">
-            <InputLabel id="payment-mode-label">{langEN['features.common.purchaseMessages'].paymentMode}</InputLabel>
+            <InputLabel id="payment-mode-label">
+              {langEN['features.common.purchaseMessages'].paymentMode}
+            </InputLabel>
             <Select
               labelId="payment-mode-label"
               value={formData.paymentMode}
@@ -371,9 +366,15 @@ const PurchaseScreen: React.FC = () => {
                 setFormData({ ...formData, paymentMode: e.target.value })
               }
             >
-              <MenuItem value="Cash">{langEN['features.common.purchaseMessages'].cash}</MenuItem>
-              <MenuItem value="Card">{langEN['features.common.purchaseMessages'].card}</MenuItem>
-              <MenuItem value="UPI">{langEN['features.common.purchaseMessages'].upi}</MenuItem>
+              <MenuItem value="Cash">
+                {langEN['features.common.purchaseMessages'].cash}
+              </MenuItem>
+              <MenuItem value="Card">
+                {langEN['features.common.purchaseMessages'].card}
+              </MenuItem>
+              <MenuItem value="UPI">
+                {langEN['features.common.purchaseMessages'].upi}
+              </MenuItem>
             </Select>
           </FormControl>
         </Grid>
@@ -451,39 +452,17 @@ const PurchaseScreen: React.FC = () => {
           </Box>
         </Grid>
       </Grid>
-      <Dialog
+      <ResetConfirmationDialog
         open={openResetConfirmation}
-        onClose={() => setOpenResetConfirmation(false)}
-      >
-        <DialogTitle>
-          {langEN['features.common.purchaseMessages'].confirmation}
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            {
-              langEN['features.common.purchaseMessages']
-                .resetPurchaseConfirmation
-            }
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={() => {
-              setOpenResetConfirmation(false)
-              setFormData(initialFormData)
-            }}
-            color="primary"
-          >
-            Yes
-          </Button>
-          <Button
-            onClick={() => setOpenResetConfirmation(false)}
-            color="primary"
-          >
-            Cancel
-          </Button>
-        </DialogActions>
-      </Dialog>
+        onClose={handleResetConfirmationClose}
+        onConfirm={handleResetConfirmationConfirm}
+      />
+      <DraftsDialog
+        open={openDraftsModal}
+        onClose={handleDraftsModalClose}
+        drafts={drafts}
+        deleteDraft={deleteDraft}
+      />
     </Box>
   )
 }

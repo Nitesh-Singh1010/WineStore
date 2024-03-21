@@ -22,7 +22,14 @@
     "paymentMode":"Payment Mode",
     "cash":"Cash",
     "card":"Card",
-    "upi":"UPI"
+    "upi":"UPI",
+    "resetConfirmationTitle": "Confirmation",
+    "resetConfirmationMessage": "Are you sure you want to reset the Order?",
+    "yesButton": "Yes",
+    "cancelButton": "Cancel",
+    "draftsTitle": "Drafts",
+    "selectDraftMessage": "Select a draft to load or delete it.",
+    "viewDrafts": "View Drafts"
   },
   
 
