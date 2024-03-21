@@ -27,7 +27,7 @@ import lang from '../../lang-en.json'
 import vars from '../../vars.json'
 import './index.scss'
 import ResetConfirmationDialog from '@components/common/ResetConfirmationDialog/ResetConfirmationDialog'
-import DraftsDialog from '../common/DraftsDialog/DraftsDialog'
+import DraftsDialog from './DraftsDialog'
 
 interface ItemRow {
   id: number
@@ -37,7 +37,7 @@ interface ItemRow {
   total: number
 }
 
-interface FormData {
+export interface FormData {
   customerName: string
   salesOrderDate: string
   itemRows: ItemRow[]

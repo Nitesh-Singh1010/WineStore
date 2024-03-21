@@ -12,8 +12,8 @@ import {
   IconButton,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-import lang from '../../../lang-en.json';
-import { FormData as SalesFormData } from '../../SalesScreen/index'; // Renaming the FormData type
+import lang from '../../lang-en.json';
+import { FormData as SalesFormData } from './index'; // Renaming the FormData type
 
 interface DraftsDialogProps {
   open: boolean;
