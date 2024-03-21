@@ -5,7 +5,31 @@
 
   "feature.loginPage.alert.incorrectInfo.message": "Incorrect username or password!!",
   "feature.loginPage.alert.compulsoryInfo.message": "Both <b>username</b> & <b>password</b> are mandatory!!",
-
+  "feature.salesScreen.hardTexts":{
+    "salesOrderTitle": "Sales Order",
+    "viewDrafts": "View Drafts",
+    "customerNameLabel": "Customer's Name",
+    "salesOrderDateLabel": "Sales Order Date",
+    "addItemButton": "Add Item",
+    "paymentModeLabel": "Payment Mode",
+    "discountTypeLabel": "Discount Type",
+    "discountValueLabel": {
+      "percentage": "Percentage (%)",
+      "absolute": "Absolute (Rs.)"
+    },
+    "paidAmountLabel": "Paid Amount",
+    "totalAmountLabel": "Total Amount : Rs.",
+    "printBillButton": "Print Bill",
+    "resetButton": "Reset",
+    "saveDraftButton": "Save as Draft",
+    "confirmButton": "Confirm",
+    "resetConfirmationTitle": "Confirmation",
+    "resetConfirmationMessage": "Are you sure you want to reset the Order?",
+    "yesButton": "Yes",
+    "cancelButton": "Cancel",
+    "draftsTitle": "Drafts",
+    "selectDraftMessage": "Select a draft to load or delete it."
+  },
   "feature.common.loader.uploadProgress.message": "{{percentCompleted}}% items fetched ...",
   "feature.common.loader.processing.message": "Processing ...",
 

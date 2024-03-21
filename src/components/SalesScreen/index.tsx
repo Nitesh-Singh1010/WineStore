@@ -28,6 +28,9 @@ import {
 import DeleteIcon from '@mui/icons-material/Delete'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
+import lang from '../../lang-en.json'
+import vars from '../../vars.json'
+import './index.scss'
 
 interface ItemRow {
   id: number
@@ -69,15 +72,15 @@ const SalesScreen: React.FC = () => {
 
   useEffect(() => {
     // Load customer name from local storage
-    const storedCustomerName = localStorage.getItem('customerName')
-    if (storedCustomerName) {
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        customerName: storedCustomerName,
-      }))
-    }
+    // const storedCustomerName = localStorage.getItem('customerName')
+    // if (storedCustomerName) {
+    //   setFormData((prevFormData) => ({
+    //     ...prevFormData,
+    //     customerName: storedCustomerName,
+    //   }))
+    // }
 
-    // Add one default item row when component mounts
+    // Adding one default item row when component mounts
     addItemRow()
   }, [])
   const addItemRow = () => {
@@ -168,7 +171,7 @@ const SalesScreen: React.FC = () => {
 
   const saveAsDraft = () => {
     // Store customer name in local storage
-    localStorage.setItem('customerName', formData.customerName)
+    // localStorage.setItem('customerName', formData.customerName)
 
     setDrafts([...drafts, formData])
     setFormData(initialFormData) // Resetting the form data to initial state
@@ -184,7 +187,7 @@ const SalesScreen: React.FC = () => {
       <DialogTitle>Drafts</DialogTitle>
       <DialogContent>
         <DialogContentText>
-          Select a draft to load or delete it.
+          {lang['feature.salesScreen.hardTexts'].selectDraftMessage}
         </DialogContentText>
         <List>
           {drafts.map((draft, index) => (
@@ -211,29 +214,22 @@ const SalesScreen: React.FC = () => {
     </Dialog>
   )
   const handlePrintBill = () => {
-    // logic to show bill details in a popup window
-    // we can use window.open() or any modal library for this purpose
     alert('Printing Bill...')
   }
   return (
     <Box sx={{ margin: 2 }}>
-      <div
-        className="heading"
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}
-      >
+      <div className="heading">
         <Typography variant="h4" component="h1">
           <ListItemIcon>
             <ShoppingCartIcon />
           </ListItemIcon>
-          Sales Order
+          {lang['feature.salesScreen.hardTexts'].salesOrderTitle}
         </Typography>
         <IconButton onClick={() => setOpenDraftsModal(true)}>
           <ArrowDropDownIcon />
-          <Typography>View Drafts</Typography>
+          <Typography>
+            {lang['feature.salesScreen.hardTexts'].viewDrafts}
+          </Typography>
         </IconButton>
       </div>
       <Grid container spacing={3} mt={2}>
@@ -276,8 +272,8 @@ const SalesScreen: React.FC = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {formData.itemRows.map((row) => (
-                <TableRow key={row.id}>
+              {formData.itemRows.map((row,index) => (
+                <TableRow key={`${row.id}-${index}`}>
                   <TableCell>
                     <TextField
                       fullWidth
@@ -287,10 +283,18 @@ const SalesScreen: React.FC = () => {
                         handleItemChange(row.id, 'itemDetail', e.target.value)
                       }
                     >
-                      <MenuItem value="Item 1">Item 1</MenuItem>
-                      <MenuItem value="Item 2">Item 2</MenuItem>
-                      <MenuItem value="Item 3">Item 3</MenuItem>
-                      <MenuItem value="Item 4">Item 4</MenuItem>
+                      <MenuItem value="Item 1">
+                        {vars['feature.itemDetails'][0]}
+                      </MenuItem>
+                      <MenuItem value="Item 2">
+                        {vars['feature.itemDetails'][1]}
+                      </MenuItem>
+                      <MenuItem value="Item 3">
+                        {vars['feature.itemDetails'][2]}
+                      </MenuItem>
+                      <MenuItem value="Item 4">
+                        {vars['feature.itemDetails'][3]}
+                      </MenuItem>
                     </TextField>
                   </TableCell>
                   <TableCell>
@@ -335,7 +339,9 @@ const SalesScreen: React.FC = () => {
       <Grid container spacing={3}>
         <Grid item xs={12} md={6}>
           <FormControl fullWidth margin="normal">
-            <InputLabel id="payment-mode-label">Payment Mode</InputLabel>
+            <InputLabel id="payment-mode-label">
+              {lang['feature.salesScreen.hardTexts'].paymentModeLabel}
+            </InputLabel>
             <Select
               labelId="payment-mode-label"
               value={formData.paymentMode}
@@ -344,9 +350,13 @@ const SalesScreen: React.FC = () => {
                 setFormData({ ...formData, paymentMode: e.target.value })
               }
             >
-              <MenuItem value="Cash">Cash</MenuItem>
-              <MenuItem value="Card">Card</MenuItem>
-              <MenuItem value="UPI">UPI</MenuItem>
+              <MenuItem value="Cash">
+                {vars['feature.paymentModes'][0]}
+              </MenuItem>
+              <MenuItem value="Card">
+                {vars['feature.paymentModes'][1]}
+              </MenuItem>
+              <MenuItem value="UPI">{vars['feature.paymentModes'][2]}</MenuItem>
             </Select>
           </FormControl>
         </Grid>
@@ -355,13 +365,25 @@ const SalesScreen: React.FC = () => {
           <Grid container spacing={2}>
             <Grid item xs={6}>
               <FormControl fullWidth margin="normal">
-                <InputLabel>Discount Type</InputLabel>
+                <InputLabel>
+                  {lang['feature.salesScreen.hardTexts'].discountTypeLabel}
+                </InputLabel>
                 <Select
                   value={formData.discountType}
                   onChange={handleDiscountTypeChange}
                 >
-                  <MenuItem value="percentage">Percentage</MenuItem>
-                  <MenuItem value="absolute">Absolute</MenuItem>
+                  <MenuItem value="percentage">
+                    {
+                      lang['feature.salesScreen.hardTexts'].discountValueLabel
+                        .percentage
+                    }
+                  </MenuItem>
+                  <MenuItem value="absolute">
+                    {
+                      lang['feature.salesScreen.hardTexts'].discountValueLabel
+                        .absolute
+                    }
+                  </MenuItem>
                 </Select>
               </FormControl>
             </Grid>
@@ -395,7 +417,7 @@ const SalesScreen: React.FC = () => {
             textAlign={'center'}
             my={5}
           >
-            Total Amount : Rs.{' '}
+            {lang['feature.salesScreen.hardTexts'].totalAmountLabel}{' '}
             {(totalAmount - formData.discountValue).toFixed(2)}
           </Typography>
         </Grid>
@@ -407,7 +429,7 @@ const SalesScreen: React.FC = () => {
               color="primary"
               sx={{ mt: 2, mr: 2 }}
             >
-              Print Bill
+              {lang['feature.salesScreen.hardTexts'].printBillButton}
             </Button>
             <Button
               variant="contained"
@@ -415,14 +437,14 @@ const SalesScreen: React.FC = () => {
               sx={{ mt: 2, mr: 2 }}
               onClick={() => setOpenResetConfirmation(true)}
             >
-              Reset
+              {lang['feature.salesScreen.hardTexts'].resetButton}
             </Button>
             <Button
               onClick={saveAsDraft}
               variant="contained"
               sx={{ mt: 2, mr: 2 }}
             >
-              Save as Draft
+              {lang['feature.salesScreen.hardTexts'].saveDraftButton}
             </Button>
             <Button
               onClick={handleSubmit}
@@ -430,7 +452,7 @@ const SalesScreen: React.FC = () => {
               color="primary"
               sx={{ mt: 2 }}
             >
-              Confirm
+              {lang['feature.salesScreen.hardTexts'].confirmButton}
             </Button>
           </Box>
         </Grid>
@@ -439,10 +461,12 @@ const SalesScreen: React.FC = () => {
         open={openResetConfirmation}
         onClose={() => setOpenResetConfirmation(false)}
       >
-        <DialogTitle>Confirmation</DialogTitle>
+        <DialogTitle>
+          {lang['feature.salesScreen.hardTexts'].resetConfirmationTitle}
+        </DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to reset the Order?
+            {lang['feature.salesScreen.hardTexts'].resetConfirmationMessage}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -454,13 +478,13 @@ const SalesScreen: React.FC = () => {
             }}
             color="primary"
           >
-            Yes
+            {lang['feature.salesScreen.hardTexts'].yesButton}
           </Button>
           <Button
             onClick={() => setOpenResetConfirmation(false)}
             color="primary"
           >
-            Cancel
+            {lang['feature.salesScreen.hardTexts'].cancelButton}
           </Button>
         </DialogActions>
       </Dialog>

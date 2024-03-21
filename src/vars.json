@@ -12,6 +12,8 @@
   "feature.fileUpload.allowedTestFileFormat.names": "",
 
   "feature.paymentModes":["Cash","Card","UPI"],
+  
+  "feature.itemDetails":["Item 1", "Item 2", "Item 3", "Item 4"],
 
   "feature.userHistory.listItem.selectionLimit.value": null,
   "feature.userHistory.listItem.visibilityCount.value": 10,
