@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import {
   Modal,
   Typography,
@@ -8,7 +8,7 @@ import {
   MenuItem,
 } from '@mui/material'
 import './QuantityModal.scss'
-
+import {  AppLangContext, AppStateContext, IAppStateContext } from '@Contexts'
 interface AddQuantityModalProps {
   open: boolean
   handleClose: () => void
@@ -30,11 +30,13 @@ const QuantityModal: React.FC<AddQuantityModalProps> = ({
   error,
   handleModalSubmit,
 }) => {
+  const { appLang } = useContext(AppLangContext)
+  const { appConfig } = useContext<IAppStateContext>(AppStateContext)
   return (
     <Modal open={open} onClose={handleClose}>
       <div className="modal-container">
         <Typography variant="h6" gutterBottom>
-          Add Quantity
+          {appLang['feature.common.quantityModal.heading']}
         </Typography>
         <TextField
           label="Enter Quantity"
@@ -61,7 +63,7 @@ const QuantityModal: React.FC<AddQuantityModalProps> = ({
           className="select"
         >
           <MenuItem value="" disabled>
-            Select Unit
+            {appLang["feature.common.quantityModal.inputLabel"]}
           </MenuItem>
           <MenuItem value="L">L</MenuItem>
           <MenuItem value="ml">ml</MenuItem>
@@ -79,7 +81,7 @@ const QuantityModal: React.FC<AddQuantityModalProps> = ({
           color="primary"
           className="save-button"
         >
-          Save Quantity
+         {appLang["feature.common.quantityModal.saveQuantity.button"]}
         </Button>
       </div>
     </Modal>

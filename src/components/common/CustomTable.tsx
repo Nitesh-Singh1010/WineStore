@@ -9,7 +9,7 @@ import TableCell, { tableCellClasses } from '@mui/material/TableCell'
 import Link from '@mui/material/Link'
 import React from 'react'
 
-interface IColumn<T> {
+export interface IColumn<T> {
   align?: 'inherit' | 'left' | 'center' | 'right' | 'justify'
   format?: (value: number) => string
   id: keyof T
@@ -19,7 +19,7 @@ interface IColumn<T> {
   minWidth?: number
 }
 
-interface ITableProps<T> {
+export interface ITableProps<T> {
   columns: Array<IColumn<T>>
   data: Array<T>
   isDense?: boolean

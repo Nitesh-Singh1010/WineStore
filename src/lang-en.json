@@ -7,15 +7,19 @@
 
   "feature.common.loader.uploadProgress.message": "{{percentCompleted}}% items fetched ...",
   "feature.common.loader.processing.message": "Processing ...",
-   "feature.common.hardNames":{
-    "itemName": "Item Names",
-    "costPrice": "Cost Price (Rs.)",
-    "sellingPrice": "Selling Price (Rs.)",
-    "quantity": "Quantity",
-    "editItemTitle": "Edit Item",
-    "saveChanges": "Save Changes",
-    "cancel": "Cancel"
-  },
+  "feature.common.templates.table.headers": [
+    "Item Name",
+    "Cost Price (Rs.)",
+    "Selling Price (Rs.)",
+    "Quantity",
+    "Edit Item",
+    "Action"
+  ],
+  "feature.itemScreen.heading":"ITEMS",
+  "feature.itemScreen.itemAdditionOptions":["Manual Addition","Bulk Upload"],
+  "feature.common.quantityModal.heading":"Add Quantity",
+  "feature.common.quantityModal.inputLabel":"Select Unit",
+  "feature.common.quantityModal.saveQuantity.button":"Save Quantity",
   "feature.common.templates.loadingMessage.text": "Loading ...",
   "feature.common.templates.popups.errorHeading.text": "Error",
   "feature.common.templates.popups.info.dontShowAgain.text": "Do not show this again",
@@ -23,5 +27,19 @@
   "feature.common.templates.popups.general.cancel.button": "Cancel",
   "feature.common.templates.popups.general.delete.button": "Delete",
   "feature.common.templates.popups.general.apply.button": "Apply",
-  "feature.common.templates.popups.general.saveAndClose.button": "Save & Close"
+  "feature.common.templates.popups.general.saveAndClose.button": "Save & Close",
+  "feature.common.templates.popups.general.save.button": "Save",
+  "feature.common.templates.uploadFiles.txt": "Upload Files",
+  "feature.common.templates.uploadFileInstructions.txt": "  Only text and PDF files are accepted. Up to 5 files.",
+  "feature.common.templates.addItem.button": "Add Item",
+  "feature.common.templates.addItems.button": "Add Item(s)",
+  "feature.manualAdditionPage.alerts": [
+    "You cannot delete the only row.",
+    "Please complete the previous item correctly before adding a new one. Ensure the selling price is not less than the cost price.",
+    "Please complete the last item correctly before submitting. Ensure the selling price is not less than the cost price."
+  ],
+  "feature.manualAdditionPage.quantityRestrictionMessages": [
+    "Quantity should be 2 or less for units L or Kg",
+    "Quantity should be 1000 or less for units g or ml"
+  ]
 }

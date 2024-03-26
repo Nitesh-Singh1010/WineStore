@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import {
   Typography,
   Radio,
@@ -8,13 +8,13 @@ import {
   FormLabel,
 } from '@mui/material'
 
-
+import { AppLangContext } from '@Contexts'
 import ManualAdditionComponent from './ItemAddition/ManualAddition/ManualAdditionComponent'
 import BulkUploadComponent from './ItemAddition/BulkUpload/BulkUploadComponent'
 
 const ItemsScreen: React.FC = () => {
   const [selectedValue, setSelectedValue] = useState<string>('manual')
-
+  const {appLang}=useContext(AppLangContext)
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedValue(event.target.value)
   }
@@ -24,7 +24,7 @@ const ItemsScreen: React.FC = () => {
       style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
     >
       <Typography variant="h4" style={{ margin: '20px 0' }}>
-        ITEMS
+       {appLang["feature.itemScreen.heading"]}
       </Typography>
       <FormControl component="fieldset">
         <RadioGroup
@@ -37,12 +37,12 @@ const ItemsScreen: React.FC = () => {
           <FormControlLabel
             value="manual"
             control={<Radio />}
-            label="Manual Addition"
+            label={appLang["feature.itemScreen.itemAdditionOptions"][0]}
           />
           <FormControlLabel
             value="bulk"
             control={<Radio />}
-            label="Bulk Upload"
+            label={appLang["feature.itemScreen.itemAdditionOptions"][1]}
           />
         </RadioGroup>
       </FormControl>

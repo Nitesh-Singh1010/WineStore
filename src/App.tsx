@@ -9,7 +9,6 @@ import baseVar from './vars.json'
 import baseLang from './lang-en.json'
 import ItemsScreen from '@components/ItemsScreen'
 import ItemList from '@components/ItemsList/ItemList'
-import ManualAdditionComponent from '@components/Items/ItemAddition/ManualAddition/ManualAdditionComponent'
 import { Inventory } from '@mui/icons-material'
 
 export interface INavItem {
@@ -46,7 +45,9 @@ const App: React.FC = () => {
           <Router>
             <div className="app-container">
               <Routes>
-                <Route path="/" element={<ItemList/>} />
+                <Route path="/" element={<HomeScreen/>} />
+                <Route path="/item" element={<ItemsScreen/>} />
+                <Route path="/item/list" element={<ItemList/>} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </div>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useContext } from 'react'
 import {
   Button,
   Table,
@@ -13,7 +13,7 @@ import EditIcon from '@mui/icons-material/Edit'
 import ItemRow from './ItemRow'
 import QuantityModal from './QuantityModal'
 import './ManualAdditionComponent.scss'
-
+import { AppLangContext } from '@Contexts'
 interface Item {
   itemName: string
   costPrice: number
@@ -47,6 +47,7 @@ const ManualAdditionComponent: React.FC = () => {
   const [newQuantity, setNewQuantity] = useState<string>('')
   const [newUnit, setNewUnit] = useState<string>('')
   const [error, setError] = React.useState<string | null>(null)
+  const { appLang } = useContext(AppLangContext)
 
   const isItemDefault = (item: Item) => {
     return (
@@ -63,7 +64,7 @@ const ManualAdditionComponent: React.FC = () => {
       newItems.splice(index, 1)
       setItems(newItems)
     } else {
-      alert('You cannot delete the only row.')
+      alert(appLang['feature.manualAdditionPage.alerts'][0])
     }
   }
 
@@ -84,9 +85,7 @@ const ManualAdditionComponent: React.FC = () => {
       }
       setItems([...items, newItem])
     } else {
-      alert(
-        'Please complete the previous item correctly before adding a new one. Ensure the selling price is not less than the cost price.'
-      )
+      alert(appLang['feature.manualAdditionPage.alerts'][1])
     }
   }
 
@@ -95,9 +94,7 @@ const ManualAdditionComponent: React.FC = () => {
     if (!isItemDefault(lastItem) && isValidPrice(lastItem)) {
       console.log(items)
     } else {
-      alert(
-        'Please complete the last item correctly before submitting. Ensure the selling price is not less than the cost price.'
-      )
+      alert(appLang['feature.manualAdditionPage.alerts'][2])
     }
   }
 
@@ -117,13 +114,17 @@ const ManualAdditionComponent: React.FC = () => {
 
   const handleModalSubmit = () => {
     if ((newUnit === 'L' || newUnit === 'Kg') && parseInt(newQuantity) > 3) {
-      setError('Quantity should be 2 or less for units L or Kg')
+      setError(
+        appLang['feature.manualAdditionPage.quantityRestrictionMessages'][0]
+      )
       return
     } else if (
       (newUnit === 'g' || newUnit === 'ml') &&
       parseInt(newQuantity) > 10000
     ) {
-      setError('Quantity should be 1000 or less for units g or ml')
+      setError(
+        appLang['feature.manualAdditionPage.quantityRestrictionMessages'][1]
+      )
       return
     }
     if (newQuantity && newUnit) {
@@ -137,18 +138,26 @@ const ManualAdditionComponent: React.FC = () => {
       <Table>
         <TableHead>
           <TableRow>
-            <TableCell>Item Name</TableCell>
-            <TableCell>Cost Price</TableCell>
-            <TableCell>Selling Price</TableCell>
+            <TableCell>
+              {appLang['feature.common.templates.table.headers'][0]}
+            </TableCell>
+            <TableCell>
+              {appLang['feature.common.templates.table.headers'][1]}
+            </TableCell>
+            <TableCell>
+              {appLang['feature.common.templates.table.headers'][2]}
+            </TableCell>
             <TableCell className="quantity-column">
-              Quantity
+              {appLang['feature.common.templates.table.headers'][3]}
               <Tooltip title="Edit">
                 <IconButton onClick={handleOpenModal}>
                   <EditIcon />
                 </IconButton>
               </Tooltip>
             </TableCell>
-            <TableCell>Action</TableCell>
+            <TableCell>
+              {appLang['feature.common.templates.table.headers'][5]}
+            </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -170,7 +179,7 @@ const ManualAdditionComponent: React.FC = () => {
         color="primary"
         className="add-item-button"
       >
-        Add Item
+        {appLang['feature.common.templates.addItem.button']}
       </Button>
       <div className="add-item-button-container">
         <Button
@@ -179,7 +188,7 @@ const ManualAdditionComponent: React.FC = () => {
           color="primary"
           className="add-inventory-button"
         >
-          Add Item(s)
+          {appLang['feature.common.templates.addItem.button']}
         </Button>{' '}
       </div>
       <QuantityModal

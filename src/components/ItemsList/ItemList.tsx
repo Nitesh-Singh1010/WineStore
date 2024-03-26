@@ -1,4 +1,4 @@
-import * as React from 'react'
+import React, { useState, useContext } from 'react'
 import { alpha } from '@mui/material/styles'
 import Box from '@mui/material/Box'
 import Table from '@mui/material/Table'
@@ -22,15 +22,21 @@ import Button from '@mui/material/Button'
 import TextField from '@mui/material/TextField'
 import FilterListIcon from '@mui/icons-material/FilterList'
 import { visuallyHidden } from '@mui/utils'
-import {ItemListData,descendingComparator,Order,getComparator,stableSort} from '../../utils'
-
-
+import { AppLangContext } from '@Contexts'
+interface ItemListData {
+  id: number
+  itemName: string
+  costPrice: number
+  sellingPrice: number
+  quantity: number
+}
 interface HeadCell {
   disablePadding: boolean
   id: keyof ItemListData
   label: string
   numeric: boolean
 }
+
 const headCells: readonly {
   id: keyof ItemListData
   numeric: boolean
@@ -82,7 +88,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
     (property: keyof ItemListData) => (event: React.MouseEvent<unknown>) => {
       onRequestSort(event, property)
     }
-
+  const { appLang } = useContext(AppLangContext)
   return (
     <TableHead>
       <TableRow>
@@ -117,7 +123,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
           </TableCell>
         ))}
         <TableCell align="right" style={{ paddingLeft: '72px' }}>
-          Action
+          {appLang['feature.common.templates.table.headers'][5]}
         </TableCell>
       </TableRow>
     </TableHead>
@@ -131,7 +137,7 @@ interface EnhancedTableToolbarProps {
 
 function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
   const { numSelected, onFilterChange } = props
-  const [filterValue, setFilterValue] = React.useState<string>('')
+  const [filterValue, setFilterValue] = useState<string>('')
 
   const handleFilterChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setFilterValue(event.target.value)
@@ -163,7 +169,7 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
         </Typography>
       ) : (
         <TextField
-          sx={{ flex: '1 1 100%'}}
+          sx={{ flex: '1 1 100%' }}
           label="Enter Item Name"
           variant="outlined"
           size="small"
@@ -185,12 +191,52 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
 }
 
 export default function ItemList() {
+  function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
+    if (b[orderBy] < a[orderBy]) {
+      return -1
+    }
+    if (b[orderBy] > a[orderBy]) {
+      return 1
+    }
+    return 0
+  }
+
+  type Order = 'asc' | 'desc'
+
+  function getComparator<Key extends keyof any>(
+    order: Order,
+    orderBy: Key
+  ): (
+    a: { [key in Key]: number | string },
+    b: { [key in Key]: number | string }
+  ) => number {
+    return order === 'desc'
+      ? (a, b) => descendingComparator(a, b, orderBy)
+      : (a, b) => -descendingComparator(a, b, orderBy)
+  }
+
+  function stableSort<T>(
+    array: readonly T[],
+    comparator: (a: T, b: T) => number
+  ) {
+    const stabilizedThis = array.map((el, index) => [el, index] as [T, number])
+    stabilizedThis.sort((a, b) => {
+      const order = comparator(a[0], b[0])
+      if (order !== 0) {
+        return order
+      }
+      return a[1] - b[1]
+    })
+    return stabilizedThis.map((el) => el[0])
+  }
   const [order, setOrder] = React.useState<Order>('asc')
-  const [orderBy, setOrderBy] = React.useState<keyof ItemListData>('sellingPrice')
+  const [orderBy, setOrderBy] =
+    React.useState<keyof ItemListData>('sellingPrice')
   const [selected, setSelected] = React.useState<readonly number[]>([])
   const [page, setPage] = React.useState(0)
   const [dense, setDense] = React.useState(false)
   const [rowsPerPage, setRowsPerPage] = React.useState(5)
+  const { appLang } = useContext(AppLangContext)
   const [rows, setRows] = React.useState<ItemListData[]>([
     {
       id: 1,
@@ -244,7 +290,9 @@ export default function ItemList() {
   ])
 
   const [open, setOpen] = React.useState(false)
-  const [selectedRow, setSelectedRow] = React.useState<ItemListData | null>(null)
+  const [selectedRow, setSelectedRow] = React.useState<ItemListData | null>(
+    null
+  )
   const [editedItem, setEditedItem] = React.useState<ItemListData | null>(null)
   const [filteredRows, setFilteredRows] = React.useState<ItemListData[]>(rows)
 
@@ -351,7 +399,7 @@ export default function ItemList() {
   }
 
   const handleFilterChange = (filterValue: string) => {
-    const filteredData = rows.filter(row =>
+    const filteredData = rows.filter((row) =>
       row.itemName.toLowerCase().includes(filterValue.toLowerCase())
     )
     setFilteredRows(filteredData)
@@ -360,7 +408,10 @@ export default function ItemList() {
   return (
     <Box sx={{ width: '100%' }}>
       <Paper sx={{ width: '100%', mb: 2 }}>
-        <EnhancedTableToolbar numSelected={selected.length} onFilterChange={handleFilterChange} />
+        <EnhancedTableToolbar
+          numSelected={selected.length}
+          onFilterChange={handleFilterChange}
+        />
         <TableContainer>
           <Table
             sx={{ minWidth: 750 }}
@@ -429,7 +480,7 @@ export default function ItemList() {
           </Table>
         </TableContainer>
         <TablePagination
-            rowsPerPageOptions={[5, 10, 25]}
+          rowsPerPageOptions={[5, 10, 25]}
           component="div"
           count={filteredRows.length}
           rowsPerPage={rowsPerPage}
@@ -441,12 +492,12 @@ export default function ItemList() {
       <Dialog open={open} onClose={handleClose}>
         <Box sx={{ p: 2 }}>
           <Typography variant="h6" gutterBottom>
-            Edit Item
+            {appLang['feature.common.templates.table.headers'][4]}
           </Typography>
           {selectedRow && (
             <>
               <TextField
-                label="Item Name"
+                label={appLang['feature.common.templates.table.headers'][0]}
                 value={editedItem?.itemName || ''}
                 onChange={(e) =>
                   setEditedItem((prev) => {
@@ -463,7 +514,7 @@ export default function ItemList() {
               />
 
               <TextField
-                label="Cost Price (Rs.)"
+                label={appLang['feature.common.templates.table.headers'][1]}
                 value={editedItem?.costPrice || ''}
                 onChange={(e) =>
                   setEditedItem((prev) => {
@@ -481,7 +532,7 @@ export default function ItemList() {
               />
 
               <TextField
-                label="Selling Price (Rs.)"
+                label={appLang['feature.common.templates.table.headers'][2]}
                 value={editedItem?.sellingPrice || ''}
                 //
                 onChange={(e) =>
@@ -500,7 +551,7 @@ export default function ItemList() {
               />
 
               <TextField
-                label="Quantity"
+                label={appLang['feature.common.templates.table.headers'][3]}
                 value={editedItem?.quantity || ''}
                 onChange={(e) =>
                   setEditedItem((prev) => {
@@ -520,10 +571,14 @@ export default function ItemList() {
           )}
           <Box sx={{ mt: 2, textAlign: 'right' }}>
             <Button onClick={handleSaveChanges} color="primary">
-              Save Changes
+              {
+                appLang[
+                  'feature.common.templates.popups.general.saveAndClose.button'
+                ]
+              }
             </Button>
             <Button onClick={handleClose} color="secondary">
-              Cancel
+              {appLang['feature.common.templates.popups.general.cancel.button']}
             </Button>
           </Box>
         </Box>
@@ -531,4 +586,3 @@ export default function ItemList() {
     </Box>
   )
 }
-
