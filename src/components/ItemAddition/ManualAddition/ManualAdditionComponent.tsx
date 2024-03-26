@@ -139,16 +139,16 @@ const ManualAdditionComponent: React.FC = () => {
         <TableHead>
           <TableRow>
             <TableCell>
-              {appLang['feature.common.templates.table.headers'][0]}
+              {appLang['feature.item.screens.table.headers'][0]}
             </TableCell>
             <TableCell>
-              {appLang['feature.common.templates.table.headers'][1]}
+              {appLang['feature.item.screens.table.headers'][1]}
             </TableCell>
             <TableCell>
-              {appLang['feature.common.templates.table.headers'][2]}
+              {appLang['feature.item.screens.table.headers'][2]}
             </TableCell>
             <TableCell className="quantity-column">
-              {appLang['feature.common.templates.table.headers'][3]}
+              {appLang['feature.item.screens.table.headers'][3]}
               <Tooltip title="Edit">
                 <IconButton onClick={handleOpenModal}>
                   <EditIcon />
@@ -156,7 +156,7 @@ const ManualAdditionComponent: React.FC = () => {
               </Tooltip>
             </TableCell>
             <TableCell>
-              {appLang['feature.common.templates.table.headers'][5]}
+              {appLang['feature.item.screens.table.headers'][5]}
             </TableCell>
           </TableRow>
         </TableHead>

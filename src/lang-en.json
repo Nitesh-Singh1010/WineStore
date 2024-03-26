@@ -7,7 +7,7 @@
 
   "feature.common.loader.uploadProgress.message": "{{percentCompleted}}% items fetched ...",
   "feature.common.loader.processing.message": "Processing ...",
-  "feature.common.templates.table.headers": [
+  "feature.item.screens.table.headers": [
     "Item Name",
     "Cost Price (Rs.)",
     "Selling Price (Rs.)",

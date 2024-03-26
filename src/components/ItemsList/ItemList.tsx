@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react'
+import React, { useState, useContext, useEffect } from 'react'
 import { alpha } from '@mui/material/styles'
 import Box from '@mui/material/Box'
 import Table from '@mui/material/Table'
@@ -123,7 +123,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
           </TableCell>
         ))}
         <TableCell align="right" style={{ paddingLeft: '72px' }}>
-          {appLang['feature.common.templates.table.headers'][5]}
+          {appLang['feature.item.screens.table.headers'][5]}
         </TableCell>
       </TableRow>
     </TableHead>
@@ -229,15 +229,14 @@ export default function ItemList() {
     })
     return stabilizedThis.map((el) => el[0])
   }
-  const [order, setOrder] = React.useState<Order>('asc')
-  const [orderBy, setOrderBy] =
-    React.useState<keyof ItemListData>('sellingPrice')
-  const [selected, setSelected] = React.useState<readonly number[]>([])
-  const [page, setPage] = React.useState(0)
-  const [dense, setDense] = React.useState(false)
-  const [rowsPerPage, setRowsPerPage] = React.useState(5)
-  const { appLang } = useContext(AppLangContext)
-  const [rows, setRows] = React.useState<ItemListData[]>([
+  const [order, setOrder] = useState<Order>('asc')
+  const [orderBy, setOrderBy] = useState<keyof ItemListData>('sellingPrice')
+  const [selected, setSelected] = useState<readonly number[]>([])
+  const [page, setPage] = useState(0)
+  const [dense, setDense] = useState(false)
+  const [rowsPerPage, setRowsPerPage] = useState(5)
+
+  const [rows, setRows] = useState<ItemListData[]>([
     {
       id: 1,
       itemName: 'Item 1',
@@ -288,15 +287,13 @@ export default function ItemList() {
       quantity: 18,
     },
   ])
+  const { appLang } = useContext(AppLangContext)
+  const [open, setOpen] = useState(false)
+  const [selectedRow, setSelectedRow] = useState<ItemListData | null>(null)
+  const [editedItem, setEditedItem] = useState<ItemListData | null>(null)
+  const [filteredRows, setFilteredRows] = useState<ItemListData[]>(rows)
 
-  const [open, setOpen] = React.useState(false)
-  const [selectedRow, setSelectedRow] = React.useState<ItemListData | null>(
-    null
-  )
-  const [editedItem, setEditedItem] = React.useState<ItemListData | null>(null)
-  const [filteredRows, setFilteredRows] = React.useState<ItemListData[]>(rows)
-
-  React.useEffect(() => {
+  useEffect(() => {
     setFilteredRows(rows)
   }, [rows])
 
@@ -492,12 +489,12 @@ export default function ItemList() {
       <Dialog open={open} onClose={handleClose}>
         <Box sx={{ p: 2 }}>
           <Typography variant="h6" gutterBottom>
-            {appLang['feature.common.templates.table.headers'][4]}
+            {appLang['feature.item.screens.table.headers'][4]}
           </Typography>
           {selectedRow && (
             <>
               <TextField
-                label={appLang['feature.common.templates.table.headers'][0]}
+                label={appLang['feature.item.screens.table.headers'][0]}
                 value={editedItem?.itemName || ''}
                 onChange={(e) =>
                   setEditedItem((prev) => {
@@ -514,7 +511,7 @@ export default function ItemList() {
               />
 
               <TextField
-                label={appLang['feature.common.templates.table.headers'][1]}
+                label={appLang['feature.item.screens.table.headers'][1]}
                 value={editedItem?.costPrice || ''}
                 onChange={(e) =>
                   setEditedItem((prev) => {
@@ -532,7 +529,7 @@ export default function ItemList() {
               />
 
               <TextField
-                label={appLang['feature.common.templates.table.headers'][2]}
+                label={appLang['feature.item.screens.table.headers'][2]}
                 value={editedItem?.sellingPrice || ''}
                 //
                 onChange={(e) =>
@@ -551,7 +548,7 @@ export default function ItemList() {
               />
 
               <TextField
-                label={appLang['feature.common.templates.table.headers'][3]}
+                label={appLang['feature.item.screens.table.headers'][3]}
                 value={editedItem?.quantity || ''}
                 onChange={(e) =>
                   setEditedItem((prev) => {
