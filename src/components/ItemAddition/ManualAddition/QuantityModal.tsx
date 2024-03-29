@@ -8,7 +8,7 @@ import {
   MenuItem,
 } from '@mui/material'
 import './QuantityModal.scss'
-import {  AppLangContext, AppStateContext, IAppStateContext } from '@Contexts'
+import { AppLangContext, AppStateContext, IAppStateContext } from '@Contexts'
 interface AddQuantityModalProps {
   open: boolean
   handleClose: () => void
@@ -63,12 +63,20 @@ const QuantityModal: React.FC<AddQuantityModalProps> = ({
           className="select"
         >
           <MenuItem value="" disabled>
-            {appLang["feature.common.quantityModal.inputLabel"]}
+            {appLang['feature.common.quantityModal.inputLabel']}
           </MenuItem>
-          <MenuItem value="L">L</MenuItem>
-          <MenuItem value="ml">ml</MenuItem>
-          <MenuItem value="Kg">Kg</MenuItem>
-          <MenuItem value="g">g</MenuItem>
+          <MenuItem value="L">
+            {appConfig['feature.quantityModal.units'][0]}
+          </MenuItem>
+          <MenuItem value="ml">
+            {appConfig['feature.quantityModal.units'][1]}
+          </MenuItem>
+          <MenuItem value="Kg">
+            {appConfig['feature.quantityModal.units'][2]}
+          </MenuItem>
+          <MenuItem value="g">
+            {appConfig['feature.quantityModal.units'][3]}
+          </MenuItem>
         </Select>
         {error && (
           <Typography variant="caption" color="error">
@@ -81,7 +89,7 @@ const QuantityModal: React.FC<AddQuantityModalProps> = ({
           color="primary"
           className="save-button"
         >
-         {appLang["feature.common.quantityModal.saveQuantity.button"]}
+          {appLang['feature.common.quantityModal.saveQuantity.button']}
         </Button>
       </div>
     </Modal>

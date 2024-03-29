@@ -6,14 +6,17 @@ import {
   TableHead,
   TableRow,
   TableCell,
+  TextField,
   IconButton,
   Tooltip,
+  Autocomplete,
 } from '@mui/material'
 import EditIcon from '@mui/icons-material/Edit'
-import ItemRow from './ItemRow'
+import DeleteIcon from '@mui/icons-material/Delete'
 import QuantityModal from './QuantityModal'
 import './ManualAdditionComponent.scss'
 import { AppLangContext } from '@Contexts'
+import CommonTable from '@components/common/CommonTable'
 interface Item {
   itemName: string
   costPrice: number
@@ -132,47 +135,110 @@ const ManualAdditionComponent: React.FC = () => {
       handleCloseModal()
     }
   }
-
+  const columns = [
+    {
+      id: 'itemName',
+      label: appLang['feature.item.screens.table.headers'][0],
+      component: (data, rowIndex) => (
+        <TextField
+          type="text"
+          value={data}
+          onChange={(e) =>
+            handleItemChange(rowIndex, 'itemName', e.target.value)
+          }
+          fullWidth
+        />
+      ),
+    },
+    {
+      id: 'costPrice',
+      label: appLang['feature.item.screens.table.headers'][1],
+      component: (data, rowIndex) => (
+        <TextField
+          type="number"
+          value={data}
+          onChange={(e) =>
+            handleItemChange(rowIndex, 'costPrice', Number(e.target.value))
+          }
+          fullWidth
+        />
+      ),
+    },
+    {
+      id: 'sellingPrice',
+      label: appLang['feature.item.screens.table.headers'][2],
+      component: (data, rowIndex) => (
+        <TextField
+          type="number"
+          value={data}
+          onChange={(e) =>
+            handleItemChange(rowIndex, 'sellingPrice', Number(e.target.value))
+          }
+          fullWidth
+        />
+      ),
+    },
+    {
+      id: 'quantity',
+      label: (
+        <React.Fragment>
+          {appLang['feature.item.screens.table.headers'][3]}{' '}
+          <Tooltip title="Edit Quantity">
+            <IconButton onClick={handleOpenModal}>
+              <EditIcon />
+            </IconButton>
+          </Tooltip>
+        </React.Fragment>
+      ),
+      component: (data, rowIndex) => (
+        <Autocomplete
+          value={data}
+          onChange={(event, value) =>
+            handleItemChange(rowIndex, 'quantity', value)
+          }
+          options={quantityOptions}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label="Quantity"
+              fullWidth
+              placeholder="Select or enter quantity"
+            />
+          )}
+        />
+      ),
+    },
+    {
+      id: 'actions',
+      label: appLang['feature.item.screens.table.headers'][5],
+      component: (rowIndex) => (
+        <>
+          <Tooltip title="Delete">
+            <IconButton
+              onClick={() => handleDeleteItem(rowIndex)}
+              color="error"
+            >
+              <DeleteIcon />
+            </IconButton>
+          </Tooltip>
+        </>
+      ),
+    },
+  ]
   return (
     <>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell>
-              {appLang['feature.item.screens.table.headers'][0]}
-            </TableCell>
-            <TableCell>
-              {appLang['feature.item.screens.table.headers'][1]}
-            </TableCell>
-            <TableCell>
-              {appLang['feature.item.screens.table.headers'][2]}
-            </TableCell>
-            <TableCell className="quantity-column">
-              {appLang['feature.item.screens.table.headers'][3]}
-              <Tooltip title="Edit">
-                <IconButton onClick={handleOpenModal}>
-                  <EditIcon />
-                </IconButton>
-              </Tooltip>
-            </TableCell>
-            <TableCell>
-              {appLang['feature.item.screens.table.headers'][5]}
-            </TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {items.map((item, index) => (
-            <ItemRow
-              key={index}
-              item={item}
-              index={index}
-              quantityOptions={quantityOptions}
-              handleItemChange={handleItemChange}
-              handleDeleteItem={handleDeleteItem}
-            />
-          ))}
-        </TableBody>
-      </Table>
+      <CommonTable
+        columns={columns}
+        rows={items.map((item) => [
+          item.itemName,
+          item.costPrice,
+          item.sellingPrice,
+          item.quantity,
+          // Empty value for actions column
+          '',
+        ])}
+        title={appLang['feature.manualAdditionPage.title']}
+      />
       <Button
         onClick={handleAddItem}
         variant="contained"
@@ -188,7 +254,7 @@ const ManualAdditionComponent: React.FC = () => {
           color="primary"
           className="add-inventory-button"
         >
-          {appLang['feature.common.templates.addItem.button']}
+          {appLang['feature.common.templates.addItems.button']}
         </Button>{' '}
       </div>
       <QuantityModal
