@@ -15,6 +15,7 @@
     "Edit Item",
     "Action"
   ],
+  "feature.item.screens.tooltip&placeholders":["Edit Quantity","Delete","Select or enter quantity","Search Item Name"],
   "feature.itemScreen.heading":"ITEMS",
   "feature.itemScreen.itemAdditionOptions":["Manual Addition","Bulk Upload"],
   "feature.common.quantityModal.heading":"Add Quantity",

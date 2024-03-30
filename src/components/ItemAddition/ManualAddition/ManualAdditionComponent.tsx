@@ -183,7 +183,9 @@ const ManualAdditionComponent: React.FC = () => {
       label: (
         <React.Fragment>
           {appLang['feature.item.screens.table.headers'][3]}{' '}
-          <Tooltip title="Edit Quantity">
+          <Tooltip
+            title={appLang['feature.item.screens.tooltip&placeholders'][0]}
+          >
             <IconButton onClick={handleOpenModal}>
               <EditIcon />
             </IconButton>
@@ -202,7 +204,9 @@ const ManualAdditionComponent: React.FC = () => {
               {...params}
               label="Quantity"
               fullWidth
-              placeholder="Select or enter quantity"
+              placeholder={
+                appLang['feature.item.screens.tooltip&placeholders'][2]
+              }
             />
           )}
         />
@@ -213,7 +217,9 @@ const ManualAdditionComponent: React.FC = () => {
       label: appLang['feature.item.screens.table.headers'][5],
       component: (rowIndex) => (
         <>
-          <Tooltip title="Delete">
+          <Tooltip
+            title={appLang['feature.item.screens.tooltip&placeholders'][1]}
+          >
             <IconButton
               onClick={() => handleDeleteItem(rowIndex)}
               color="error"

@@ -215,7 +215,7 @@ export default function ItemList() {
     <div style={{ width: '100%' }}>
       <TextField
         fullWidth
-        placeholder="Search Item Name"
+        placeholder={appLang['feature.item.screens.tooltip&placeholders'][3]}
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
         margin="normal"
@@ -323,4 +323,3 @@ export default function ItemList() {
     </div>
   )
 }
-
