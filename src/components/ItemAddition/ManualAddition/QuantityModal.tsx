@@ -49,7 +49,7 @@ const QuantityModal: React.FC<AddQuantityModalProps> = ({
               setNewQuantity(value)
             }
           }}
-          type="number"
+          type="text"
           InputProps={{ inputProps: { min: 0 } }}
           required
           className="text-field"

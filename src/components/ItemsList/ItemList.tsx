@@ -105,15 +105,17 @@ export default function ItemList() {
   ])
 
   const [editModalOpen, setEditModalOpen] = useState<boolean>(false)
-  const [editedItem, setEditedItem] = useState<ItemListData | null>(null)
+  const [lastEditedItem, setlastEditedItem] = useState<ItemListData | null>(
+    null
+  )
 
   const openEditModal = (item: ItemListData) => {
-    setEditedItem(item)
+    setlastEditedItem(item)
     setEditModalOpen(true)
   }
 
   const closeEditModal = () => {
-    setEditedItem(null)
+    setlastEditedItem(null)
     setEditModalOpen(false)
   }
 
@@ -122,10 +124,13 @@ export default function ItemList() {
   }
 
   const saveChanges = () => {
-    if (editedItem && editedItem.sellingPrice >= editedItem.costPrice) {
+    if (
+      lastEditedItem &&
+      lastEditedItem.sellingPrice >= lastEditedItem.costPrice
+    ) {
       setRows((prevRows) =>
         prevRows.map((row) =>
-          row.id === editedItem.id ? { ...editedItem } : row
+          row.id === lastEditedItem.id ? { ...lastEditedItem } : row
         )
       )
       closeEditModal()
@@ -260,13 +265,13 @@ export default function ItemList() {
           {appLang['feature.itemList.editItemModalHeading']}
         </DialogTitle>
         <DialogContent>
-          {editedItem && (
+          {lastEditedItem && (
             <>
               <TextField
                 label={appLang['feature.item.screens.table.headers'][0]}
-                value={editedItem.itemName}
+                value={lastEditedItem.itemName}
                 onChange={(e) =>
-                  setEditedItem((prev) =>
+                  setlastEditedItem((prev) =>
                     prev ? { ...prev, itemName: e.target.value } : null
                   )
                 }
@@ -275,9 +280,9 @@ export default function ItemList() {
               />
               <TextField
                 label={appLang['feature.item.screens.table.headers'][1]}
-                value={editedItem.costPrice}
+                value={lastEditedItem.costPrice}
                 onChange={(e) =>
-                  setEditedItem((prev) =>
+                  setlastEditedItem((prev) =>
                     prev ? { ...prev, costPrice: Number(e.target.value) } : null
                   )
                 }
@@ -286,9 +291,9 @@ export default function ItemList() {
               />
               <TextField
                 label={appLang['feature.item.screens.table.headers'][2]}
-                value={editedItem.sellingPrice}
+                value={lastEditedItem.sellingPrice}
                 onChange={(e) =>
-                  setEditedItem((prev) =>
+                  setlastEditedItem((prev) =>
                     prev
                       ? { ...prev, sellingPrice: Number(e.target.value) }
                       : null
@@ -299,9 +304,9 @@ export default function ItemList() {
               />
               <TextField
                 label={appLang['feature.item.screens.table.headers'][3]}
-                value={editedItem.quantity}
+                value={lastEditedItem.quantity}
                 onChange={(e) =>
-                  setEditedItem((prev) =>
+                  setlastEditedItem((prev) =>
                     prev ? { ...prev, quantity: Number(e.target.value) } : null
                   )
                 }

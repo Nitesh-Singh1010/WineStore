@@ -31,7 +31,7 @@
   "feature.common.templates.popups.general.saveAndClose.button": "Save & Close",
   "feature.common.templates.popups.general.save.button": "Save",
   "feature.common.templates.uploadFiles.txt": "Upload Files",
-  "feature.common.templates.uploadFileInstructions.txt": "  Only text and PDF files are accepted. Up to 5 files.",
+  "feature.common.templates.uploadFileInstructions.txt": "  Only text and PDF files are accepted. Up to 15 files.",
   "feature.common.templates.addItem.button": "Add Item",
   "feature.common.templates.addItems.button": "Add Item(s)",
   "feature.manualAdditionPage.alerts": [

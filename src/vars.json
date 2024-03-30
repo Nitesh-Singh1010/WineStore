@@ -10,7 +10,7 @@
   "feature.quantityModal.units": ["L", "ml", "Kg", "g"],
 
   "feature.fileUpload.allowedFileSizeInMB.max": 2,
-  "feature.fileUpload.allowedFilesCount.max": 5,
+  "feature.fileUpload.allowedFilesCount.max": 15,
   "feature.fileUpload.allowedFileFormat.names": ".pdf, .txt",
   "feature.fileUpload.allowedTestFileFormat.names": "",
 

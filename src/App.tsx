@@ -46,8 +46,8 @@ const App: React.FC = () => {
             <div className="app-container">
               <Routes>
                 <Route path="/" element={<HomeScreen/>} />
-                <Route path="/item" element={<ItemsScreen/>} />
-                <Route path="/item/list" element={<ItemList/>} />
+                <Route path="/items" element={<ItemsScreen/>} />
+                <Route path="/items/create" element={<ItemList/>} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </div>

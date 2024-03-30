@@ -59,7 +59,10 @@ const BulkUploadComponent = () => {
         continue
       }
 
-      if (fileItems.length >= 15) {
+      if (
+        fileItems.length >=
+        appConfig['feature.fileUpload.allowedFilesCount.max']
+      ) {
         errorOccurred = true
         //  error handling and showing message for exceeding file count limit
         continue
@@ -76,17 +79,7 @@ const BulkUploadComponent = () => {
       }
     }
 
-    setFileItems([...newFileItems, ...fileItems].slice(0, 15))
-  }
-
-  const handleFileItemClick = (fileItem) => {
-    setFileItems(fileItems.filter((item) => item.name !== fileItem.name))
-
-    // Resetting the file input to be able to add the same file again after it was removed.
-    const fileInput = document.getElementById('file-upload')
-    if (fileInput) {
-      fileInput.value = ''
-    }
+    setFileItems([...newFileItems, ...fileItems])
   }
 
   return (

@@ -1,11 +1,6 @@
 import React, { useState, useContext } from 'react'
 import {
   Button,
-  Table,
-  TableBody,
-  TableHead,
-  TableRow,
-  TableCell,
   TextField,
   IconButton,
   Tooltip,
@@ -36,23 +31,22 @@ const ManualAdditionComponent: React.FC = () => {
     '1L',
     '1.5L',
   ])
-
-  const [items, setItems] = useState<Item[]>([
-    {
-      itemName: '',
-      costPrice: 0,
-      sellingPrice: 0,
-      quantity: null,
-    },
-  ])
-
-  const [modalOpen, setModalOpen] = useState<boolean>(false)
+  const defaultItem = {
+    itemName: '',
+    costPrice: 0,
+    sellingPrice: 0,
+    quantity: null,
+  }
+  const [items, setItems] = useState<Item[]>([defaultItem])
+  const [quantityModalOpen, setQuantityModalOpen] = useState<boolean>(false)
   const [newQuantity, setNewQuantity] = useState<string>('')
   const [newUnit, setNewUnit] = useState<string>('')
-  const [error, setError] = React.useState<string | null>(null)
+  const [invalidQuantityError, setInvalidQuantityError] = React.useState<
+    string | null
+  >(null)
   const { appLang } = useContext(AppLangContext)
 
-  const isItemDefault = (item: Item) => {
+  const itItemInvalid = (item: Item) => {
     return (
       !item.itemName ||
       item.costPrice <= 0 ||
@@ -79,14 +73,8 @@ const ManualAdditionComponent: React.FC = () => {
 
   const handleAddItem = () => {
     const lastItem = items[items.length - 1]
-    if (!isItemDefault(lastItem) && isValidPrice(lastItem)) {
-      const newItem = {
-        itemName: '',
-        costPrice: 0,
-        sellingPrice: 0,
-        quantity: null,
-      }
-      setItems([...items, newItem])
+    if (!itItemInvalid(lastItem) && isValidPrice(lastItem)) {
+      setItems([...items, defaultItem])
     } else {
       alert(appLang['feature.manualAdditionPage.alerts'][1])
     }
@@ -94,7 +82,7 @@ const ManualAdditionComponent: React.FC = () => {
 
   const handleAddInventory = () => {
     const lastItem = items[items.length - 1]
-    if (!isItemDefault(lastItem) && isValidPrice(lastItem)) {
+    if (!itItemInvalid(lastItem) && isValidPrice(lastItem)) {
       console.log(items)
     } else {
       alert(appLang['feature.manualAdditionPage.alerts'][2])
@@ -106,18 +94,18 @@ const ManualAdditionComponent: React.FC = () => {
   }
 
   const handleOpenModal = () => {
-    setModalOpen(true)
+    setQuantityModalOpen(true)
   }
 
   const handleCloseModal = () => {
-    setModalOpen(false)
+    setQuantityModalOpen(false)
     setNewQuantity('')
     setNewUnit('')
   }
 
-  const handleModalSubmit = () => {
+  const hanndleAddQuantityModalSubmit = () => {
     if ((newUnit === 'L' || newUnit === 'Kg') && parseInt(newQuantity) > 3) {
-      setError(
+      setInvalidQuantityError(
         appLang['feature.manualAdditionPage.quantityRestrictionMessages'][0]
       )
       return
@@ -125,7 +113,7 @@ const ManualAdditionComponent: React.FC = () => {
       (newUnit === 'g' || newUnit === 'ml') &&
       parseInt(newQuantity) > 10000
     ) {
-      setError(
+      setInvalidQuantityError(
         appLang['feature.manualAdditionPage.quantityRestrictionMessages'][1]
       )
       return
@@ -192,7 +180,7 @@ const ManualAdditionComponent: React.FC = () => {
           </Tooltip>
         </React.Fragment>
       ),
-      component: (data, rowIndex) => (
+      component: (data: any, rowIndex: number) => (
         <Autocomplete
           value={data}
           onChange={(event, value) =>
@@ -245,12 +233,7 @@ const ManualAdditionComponent: React.FC = () => {
         ])}
         title={appLang['feature.manualAdditionPage.title']}
       />
-      <Button
-        onClick={handleAddItem}
-        variant="contained"
-        color="primary"
-        className="add-item-button"
-      >
+      <Button onClick={handleAddItem} variant="contained" color="primary">
         {appLang['feature.common.templates.addItem.button']}
       </Button>
       <div className="add-item-button-container">
@@ -258,20 +241,19 @@ const ManualAdditionComponent: React.FC = () => {
           onClick={handleAddInventory}
           variant="contained"
           color="primary"
-          className="add-inventory-button"
         >
           {appLang['feature.common.templates.addItems.button']}
         </Button>{' '}
       </div>
       <QuantityModal
-        open={modalOpen}
+        open={quantityModalOpen}
         handleClose={handleCloseModal}
         newQuantity={newQuantity}
         setNewQuantity={setNewQuantity}
         newUnit={newUnit}
         setNewUnit={setNewUnit}
-        error={error}
-        handleModalSubmit={handleModalSubmit}
+        error={invalidQuantityError}
+        handleModalSubmit={hanndleAddQuantityModalSubmit}
       />
     </>
   )
