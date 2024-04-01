@@ -1,18 +1,4 @@
 .app-container {
   height: 100vh;
-  width: 99.98vw;
-  .custom-centered-message {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    height: 90%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2rem;
-    gap: 0.5rem;
-    .additional-info {
-      font-size: 0.9rem;
-    }
-  }
+  width: 100%;
 }
