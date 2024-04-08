@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react'
+import React, { useState, useContext, useEffect } from 'react'
 import {
   Button,
   TextField,
@@ -12,6 +12,7 @@ import QuantityModal from './QuantityModal'
 import './ManualAdditionComponent.scss'
 import { AppLangContext } from '@Contexts'
 import CommonTable from '@components/common/CommonTable'
+
 interface Item {
   itemName: string
   costPrice: number
@@ -20,17 +21,7 @@ interface Item {
 }
 
 const ManualAdditionComponent: React.FC = () => {
-  const [quantityOptions, setQuantityOptions] = useState<string[]>([
-    '50ml(Miniature)',
-    '180ml(Quarter)',
-    '330ml(Beer Pint)',
-    '375ml(Half)',
-    '500ml(Beer Can)',
-    '650ml(Beer)',
-    '750ml(Full)',
-    '1L',
-    '1.5L',
-  ])
+  const [quantityOptions, setQuantityOptions] = useState<string[]>([])
   const defaultItem = {
     itemName: '',
     costPrice: 0,
@@ -45,6 +36,40 @@ const ManualAdditionComponent: React.FC = () => {
     string | null
   >(null)
   const { appLang } = useContext(AppLangContext)
+  useEffect(() => {
+    const fetchQuantities = async () => {
+      try {
+        const response = await fetch(
+          'http://localhost:8000/api/quantity-type',
+          {
+            headers: {
+              store: '1',
+            },
+          }
+        )
+        if (response.ok) {
+          const responseData = await response.json()
+          // Check if data array exists in the response
+          if (responseData.data && Array.isArray(responseData.data)) {
+            // Extract quantity options from the API response data and set them to state
+            setQuantityOptions(
+              responseData.data.map(
+                (quantity: any) => `${quantity.value} ${quantity.size}`
+              )
+            )
+          } else {
+            console.error('Invalid API response data:', responseData)
+          }
+        } else {
+          console.error('Failed to fetch quantities:', response.statusText)
+        }
+      } catch (error) {
+        console.error('Error fetching quantities:', error)
+      }
+    }
+
+    fetchQuantities()
+  }, [])
 
   const itItemInvalid = (item: Item) => {
     return (
@@ -80,12 +105,30 @@ const ManualAdditionComponent: React.FC = () => {
     }
   }
 
-  const handleAddInventory = () => {
-    const lastItem = items[items.length - 1]
-    if (!itItemInvalid(lastItem) && isValidPrice(lastItem)) {
-      console.log(items)
-    } else {
-      alert(appLang['feature.manualAdditionPage.alerts'][2])
+  const handleAddInventory = async () => {
+    const itemsToSend = items.map((item) => ({
+      name: item.itemName,
+      cost_price: item.costPrice,
+      sale_price: item.sellingPrice,
+      quantity_type_id: 1,
+    }))
+    try {
+      for (const item of itemsToSend) {
+        console.log('Sending item:', item)
+        //  API call:
+        await fetch('http://localhost:8000/api/item/create', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            store: '1',
+          },
+          body: JSON.stringify(item),
+        })
+      }
+      // alert('Items added successfully!')
+    } catch (error) {
+      console.error('Error in my API call:', error)
+      // alert('Failed to add items. Please try again later.')
     }
   }
 
@@ -103,7 +146,7 @@ const ManualAdditionComponent: React.FC = () => {
     setNewUnit('')
   }
 
-  const hanndleAddQuantityModalSubmit = () => {
+  const handleAddQuantityModalSubmit = () => {
     if ((newUnit === 'L' || newUnit === 'Kg') && parseInt(newQuantity) > 3) {
       setInvalidQuantityError(
         appLang['feature.manualAdditionPage.quantityRestrictionMessages'][0]
@@ -119,6 +162,34 @@ const ManualAdditionComponent: React.FC = () => {
       return
     }
     if (newQuantity && newUnit) {
+      const payload = {
+        size: newUnit,
+        value: parseFloat(newQuantity), // Convert quantity to a float
+      }
+
+      // Make the API call here using fetch or any other method
+      fetch('http://localhost:8000/api/quantity-type', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          store: '1',
+        },
+        body: JSON.stringify(payload),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok')
+          }
+          return response.json()
+        })
+        .then((data) => {
+          // Handle the successful response
+          console.log('Success:', data)
+        })
+        .catch((error) => {
+          // Handle errors here
+          console.error('Error:', error)
+        })
       setQuantityOptions([...quantityOptions, `${newQuantity} ${newUnit}`])
       handleCloseModal()
     }
@@ -253,7 +324,7 @@ const ManualAdditionComponent: React.FC = () => {
         newUnit={newUnit}
         setNewUnit={setNewUnit}
         error={invalidQuantityError}
-        handleModalSubmit={hanndleAddQuantityModalSubmit}
+        handleModalSubmit={handleAddQuantityModalSubmit}
       />
     </>
   )

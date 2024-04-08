@@ -9,14 +9,14 @@ import DialogActions from '@mui/material/DialogActions'
 import Button from '@mui/material/Button'
 import TextField from '@mui/material/TextField'
 import TablePagination from '@mui/material/TablePagination'
-import React, { useState, useMemo, useContext } from 'react'
+import React, { useState, useMemo, useContext, useEffect } from 'react'
 import { AppLangContext } from '@Contexts'
 interface ItemListData {
   id: number
   itemName: string
   costPrice: number
   sellingPrice: number
-  quantity: number
+  quantity: { size: string; value: number }
 }
 
 type SortDirection = 'asc' | 'desc'
@@ -32,13 +32,170 @@ function sortComparator<T>(a: T, b: T, direction: SortDirection) {
 }
 
 export default function ItemList() {
+  const [rows, setRows] = useState<ItemListData[]>([])
+  const [editModalOpen, setEditModalOpen] = useState<boolean>(false)
+  const [lastEditedItem, setlastEditedItem] = useState<ItemListData | null>(
+    null
+  )
+  const [searchQuery, setSearchQuery] = useState<string>('')
+  const [page, setPage] = useState(0)
+  const [rowsPerPage, setRowsPerPage] = useState(5)
   const { appLang } = useContext(AppLangContext)
   const [sortConfig, setSortConfig] = useState<{
     key: keyof ItemListData
     direction: SortDirection
   } | null>(null)
+  useEffect(() => {
+    getAllItems()
+    // itemsSend()
+  }, [])
+  const itemsSend = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/api/item/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          store: '1',
+        },
+        body: JSON.stringify({
+          name: 'BP',
+          cost_price: 400,
+          sale_price: 900,
+          quantity: {
+            size: 'FULL',
+            value: 4,
+          },
+        }),
+      })
+      if (!response.ok) {
+        throw new Error(
+          `HTTP error! status in POST request: ${response.status}`
+        )
+      }
+      const data = await response.json()
+      console.log('Success:', data)
+    } catch (error) {
+      console.error('Error in POST request:', error)
+    }
+  }
 
-  const [searchQuery, setSearchQuery] = useState<string>('')
+  const itemsFetch = async (itemId: number) => {
+    try {
+      const response = await fetch(
+        `http://localhost:8000/api/item/get/${itemId}`,
+        {
+          method: 'GET',
+          headers: {
+            store: '1',
+          },
+        }
+      )
+      if (!response.ok) {
+        throw new Error('Network response was not ok in Get request')
+      }
+      const data = await response.json()
+      if (data.status === 'OK') {
+        console.log('Success', data)
+      } else {
+        console.error('API Response Error:', data.message)
+      }
+    } catch (error) {
+      console.error(
+        'There was a problem with  fetch operation in this GET request:',
+        error
+      )
+    }
+  }
+
+  const updateItemStatus = async (itemId: number, newStatus: string) => {
+    try {
+      const response = await fetch(
+        `http://localhost:8000/api/item/status_update/${itemId}?status=${newStatus}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            store: '1',
+            'User-Agent': 'insomnia/8.6.1',
+          },
+        }
+      )
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      const data = await response.json()
+      console.log('Success:', data)
+    } catch (error) {
+      console.error('Error:', error)
+    }
+  }
+  const updateItem = async (itemId) => {
+    try {
+      const data = {
+        name: 'Black Label',
+        cost_price: 300,
+        sale_price: 1000,
+        quantity: {
+          size: 'FULL',
+          value: 1,
+        },
+      }
+
+      const response = await fetch(
+        `http://localhost:8000/api/item/update/${itemId}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            store: '1',
+          },
+          body: JSON.stringify(data),
+        }
+      )
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const responseData = await response.json()
+      console.log('Success:', responseData)
+    } catch (error) {
+      console.error('Error:', error)
+    }
+  }
+  const getAllItems = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/api/items', {
+        method: 'GET',
+        headers: {
+          'User-Agent': 'insomnia/8.6.1',
+          store: '1',
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const responseData = await response.json()
+
+      const apiRows = responseData.data.map((item: any) => ({
+        id: item.id,
+        itemName: item.name,
+        costPrice: parseFloat(item.cost_price),
+        sellingPrice: parseFloat(item.sale_price),
+        quantity: {
+          size: item.quantity.size,
+          value: parseInt(item.quantity.value),
+          identifier: item.id,
+        },
+      }))
+
+      setRows(apiRows)
+    } catch (error) {
+      console.error('Error:', error)
+    }
+  }
 
   const requestSort = (key: keyof ItemListData) => {
     let direction: SortDirection = 'asc'
@@ -52,66 +209,37 @@ export default function ItemList() {
     setSortConfig({ key, direction })
   }
 
-  const [rows, setRows] = useState<ItemListData[]>([
-    {
-      id: 1,
-      itemName: 'Item 1',
-      costPrice: 280,
-      sellingPrice: 360,
-      quantity: 27,
-    },
-    {
-      id: 2,
-      itemName: 'Item 2',
-      costPrice: 450,
-      sellingPrice: 560,
-      quantity: 31,
-    },
-    {
-      id: 3,
-      itemName: 'Item 3',
-      costPrice: 170,
-      sellingPrice: 210,
-      quantity: 19,
-    },
-    {
-      id: 4,
-      itemName: 'Item 4',
-      costPrice: 450,
-      sellingPrice: 490,
-      quantity: 47,
-    },
-    {
-      id: 5,
-      itemName: 'Item 5',
-      costPrice: 220,
-      sellingPrice: 255,
-      quantity: 56,
-    },
-    {
-      id: 6,
-      itemName: 'Item 6',
-      costPrice: 130,
-      sellingPrice: 140,
-      quantity: 10,
-    },
-    {
-      id: 7,
-      itemName: 'Item 7',
-      costPrice: 790,
-      sellingPrice: 850,
-      quantity: 18,
-    },
-  ])
-
-  const [editModalOpen, setEditModalOpen] = useState<boolean>(false)
-  const [lastEditedItem, setlastEditedItem] = useState<ItemListData | null>(
-    null
-  )
-
-  const openEditModal = (item: ItemListData) => {
-    setlastEditedItem(item)
-    setEditModalOpen(true)
+  const openEditModal = async (item: ItemListData) => {
+    try {
+      const response = await fetch(
+        `http://localhost:8000/api/item/get/${item.id}`,
+        {
+          method: 'GET',
+          headers: {
+            store: '1',
+          },
+        }
+      )
+      if (response.ok) {
+        const data = await response.json()
+        const editedItemData: ItemListData = {
+          id: data.data.id,
+          itemName: data.data.name,
+          costPrice: parseFloat(data.data.cost_price),
+          sellingPrice: parseFloat(data.data.sale_price),
+          quantity: {
+            size: data.data.quantity.size,
+            value: parseFloat(data.data.quantity.value),
+          },
+        }
+        setlastEditedItem(editedItemData) // Set fetched item details
+        setEditModalOpen(true) // Open the edit modal
+      } else {
+        console.error('Failed to fetch item details:', response.statusText)
+      }
+    } catch (error) {
+      console.error('Error fetching item details:', error)
+    }
   }
 
   const closeEditModal = () => {
@@ -119,34 +247,46 @@ export default function ItemList() {
     setEditModalOpen(false)
   }
 
-  const deleteRow = (index: number) => {
-    setRows((prevRows) => prevRows.filter((_, rowIndex) => rowIndex !== index))
-  }
+  const deleteRow = async (index: number) => {
+    // setRows((prevRows) => prevRows.filter((_, rowIndex) => rowIndex !== index))
+    const itemIdToDelete = rows[index].id
+    try {
+      // Call the updateItemStatus API with the ID of the row being deleted
+      await updateItemStatus(itemIdToDelete, 'Deleted')
 
-  const saveChanges = () => {
-    if (
-      lastEditedItem &&
-      lastEditedItem.sellingPrice >= lastEditedItem.costPrice
-    ) {
+      // Remove the deleted row from the rows state
       setRows((prevRows) =>
-        prevRows.map((row) =>
-          row.id === lastEditedItem.id ? { ...lastEditedItem } : row
-        )
+        prevRows.filter((_, rowIndex) => rowIndex !== index)
       )
-      closeEditModal()
-    } else {
-      // Handling validation error (selling price less than cost price)
-      alert(appLang['feature.sellingPrice.costPrice.rule'])
+    } catch (error) {
+      console.error('Error:', error)
     }
   }
 
+  const saveChanges = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:8000/api/item/update/${lastEditedItem.id}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            store: '1',
+          },
+          body: JSON.stringify(lastEditedItem), // Assuming lastEditedItem contains updated values
+        }
+      )
+      if (response.ok) {
+        // Update the UI or any state if needed
+        setEditModalOpen(false) // Close the edit modal
+      } else {
+        console.error('Failed to update item:', response.statusText)
+      }
+    } catch (error) {
+      console.error('Error updating item:', error)
+    }
+  }
   const columns = [
-    {
-      id: 'id',
-      label: 'ID',
-      component: (data: any) => <span>{data}</span>,
-      requestSort: () => requestSort('id'),
-    },
     {
       id: 'itemName',
       label: 'Item Name',
@@ -168,7 +308,7 @@ export default function ItemList() {
     {
       id: 'quantity',
       label: 'Quantity',
-      component: (data: any) => <span>{data}</span>,
+      component: (data: any) => <span>{data.value}</span>,
       requestSort: () => requestSort('quantity'),
     },
     {
@@ -202,9 +342,6 @@ export default function ItemList() {
     )
   }, [sortedRows, searchQuery])
 
-  const [page, setPage] = useState(0)
-  const [rowsPerPage, setRowsPerPage] = useState(5)
-
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage)
   }
@@ -230,7 +367,6 @@ export default function ItemList() {
         rows={filteredAndSortedRows
           .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
           .map((row) => [
-            row.id,
             row.itemName,
             row.costPrice,
             row.sellingPrice,
@@ -277,6 +413,7 @@ export default function ItemList() {
                 }
                 fullWidth
                 margin="normal"
+                disabled
               />
               <TextField
                 label={appLang['feature.item.screens.table.headers'][1]}
@@ -304,14 +441,23 @@ export default function ItemList() {
               />
               <TextField
                 label={appLang['feature.item.screens.table.headers'][3]}
-                value={lastEditedItem.quantity}
+                value={lastEditedItem.quantity.value}
                 onChange={(e) =>
                   setlastEditedItem((prev) =>
-                    prev ? { ...prev, quantity: Number(e.target.value) } : null
+                    prev
+                      ? {
+                          ...prev,
+                          quantity: {
+                            ...prev.quantity,
+                            value: Number(e.target.value),
+                          },
+                        }
+                      : null
                   )
                 }
                 fullWidth
                 margin="normal"
+                disabled
               />
             </>
           )}
