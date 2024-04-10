@@ -187,7 +187,7 @@ export default function ItemList() {
         quantity: {
           size: item.quantity.size,
           value: parseInt(item.quantity.value),
-          identifier: item.id,
+          identifier: item.quantity.identifier,
         },
       }))
 
@@ -308,7 +308,7 @@ export default function ItemList() {
     {
       id: 'quantity',
       label: 'Quantity',
-      component: (data: any) => <span>{data.value}</span>,
+      component: (data: any) => <span>{data.identifier}</span>,
       requestSort: () => requestSort('quantity'),
     },
     {
@@ -413,7 +413,6 @@ export default function ItemList() {
                 }
                 fullWidth
                 margin="normal"
-                disabled
               />
               <TextField
                 label={appLang['feature.item.screens.table.headers'][1]}
@@ -439,7 +438,7 @@ export default function ItemList() {
                 fullWidth
                 margin="normal"
               />
-              <TextField
+              {/* <TextField
                 label={appLang['feature.item.screens.table.headers'][3]}
                 value={lastEditedItem.quantity.value}
                 onChange={(e) =>
@@ -458,6 +457,12 @@ export default function ItemList() {
                 fullWidth
                 margin="normal"
                 disabled
+              /> */}
+              <TextField
+                label={appLang['feature.item.screens.table.headers'][3]}
+                value={`${lastEditedItem.quantity.value}-${lastEditedItem.quantity.size}`}
+                fullWidth
+                margin="normal"
               />
             </>
           )}
