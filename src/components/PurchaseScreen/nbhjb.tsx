@@ -1,3 +1,4 @@
+import React, { useState, useCallback, useContext, useEffect } from 'react'
 import {
   Box,
   Button,
@@ -25,20 +26,26 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import { v4 as uuidv4 } from 'uuid'
-import React, { useState, useCallback, useContext, useEffect } from 'react'
-import { SelectChangeEvent } from '@mui/material/Select'
-import FileUpload from './FileUpload'
 import './index.scss'
 import ResetConfirmationDialog from '@components/common/ResetConfirmationDialog/ResetConfirmationDialog'
 import DraftsDialog from '@components/PurchaseScreen/DraftsDialog'
+import FileUpload from './FileUpload'
 import { calculateTotalAmount } from '../../utils'
 import { AppLangContext } from '@Contexts'
+
+interface Item {
+  id: number
+  name: string
+  costPrice: number
+  sellingPrice: number
+}
+
 interface ItemRow {
   id: string
   itemDetail: string
   quantity: number
-  purchase_price: number
-  sale_price: number
+  costPrice: number
+  sellingPrice: number
   total: number
 }
 
@@ -71,35 +78,37 @@ const PurchaseScreen: React.FC = () => {
   const [openResetConfirmation, setOpenResetConfirmation] = useState(false)
   const [openDraftsModal, setOpenDraftsModal] = useState(false)
   const [drafts, setDrafts] = useState<FormData[]>([]) // State to store drafts
-  const [itemNames, setItemNames] = useState<string[]>([])
-  const [itemDetails, setItemDetails] = useState<any[]>([])
-  useEffect(() => {
-    // Fetch item names from API when component mounts
-    fetchItemNames()
-  }, [])
+  const [items, setItems] = useState<Item[]>([]) // State to store items fetched from API
 
-  const fetchItemNames = async () => {
+  // Fetch all items from API on component mount
+  useEffect(() => {
+    fetchItems()
+  }, [])
+  const fetchItems = async () => {
     try {
       const response = await fetch('http://localhost:8000/api/items', {
         headers: {
-          store: '1', // Assuming store ID is '1'
+          store: 1,
         },
       })
       const responseData = await response.json()
-      setItemDetails(responseData.data)
-      const names = responseData.data.map((item: any) => item.name)
-      setItemNames(names)
+      console.log(responseData)
+      if (responseData.status === 'OK') {
+        setItems(responseData.data) // Set the data array to the items state variable
+      } else {
+        console.error('Error fetching items:', responseData.message)
+      }
     } catch (error) {
-      console.error('Error fetching item names:', error)
+      console.error('Error fetching items:', error)
     }
   }
-
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       setFiles([...files, ...acceptedFiles])
     },
     [files]
   )
+
   const addItemRow = () => {
     setFormData((prevState) => ({
       ...prevState,
@@ -109,8 +118,8 @@ const PurchaseScreen: React.FC = () => {
           id: uuidv4(),
           itemDetail: '',
           quantity: 0,
-          purchase_price: 0,
-          sale_price: 0,
+          costPrice: 0,
+          sellingPrice: 0,
           total: 0,
         },
       ],
@@ -124,40 +133,91 @@ const PurchaseScreen: React.FC = () => {
       itemRows: prevState.itemRows.filter((row) => row.id !== id),
     }))
   }
-
-  const handleItemChange = (
+  const handleItemChange = async (
     id: string,
     field: keyof ItemRow,
     value: string
   ) => {
-    setFormData((prevState) => ({
-      ...prevState,
-      itemRows: prevState.itemRows.map((row) => {
-        if (row.id === id) {
-          const updatedRow = { ...row, [field]: value }
+    // Update item detail
+    if (field === 'itemDetail') {
+      const selectedItem = items.find((item) => item.name === value)
+      if (selectedItem) {
+        const itemDetails = await getItemDetails(selectedItem.id)
+        setFormData((prevState) => ({
+          ...prevState,
+          itemRows: prevState.itemRows.map((row) =>
+            row.id === id
+              ? {
+                  ...row,
+                  itemDetail: value,
+                  costPrice: itemDetails.costPrice,
+                  sellingPrice: itemDetails.sellingPrice,
+                }
+              : row
+          ),
+        }))
+      }
+    } else {
+      setFormData((prevState) => ({
+        ...prevState,
+        itemRows: prevState.itemRows.map((row) => {
+          if (row.id === id) {
+            const updatedRow = { ...row, [field]: value }
 
-          if (field === 'itemDetail') {
-            // Find the item details from the itemDetails state based on the selected item name
-            const selectedItem = itemDetails.find(
-              (item: any) => item.name === value
-            )
-
-            if (selectedItem) {
-              // Autofill purchase price and sale price based on the selected item details
-              updatedRow.purchase_price = parseFloat(selectedItem.cost_price)
-              updatedRow.sale_price = parseFloat(selectedItem.sale_price)
+            if (['quantity', 'costPrice', 'sellingPrice'].includes(field)) {
+              const total = updatedRow.quantity * updatedRow.costPrice
+              return { ...updatedRow, total }
             }
-          } else if (field === 'quantity') {
-            // Calculate row total when quantity is entered
-            updatedRow.total =
-              parseFloat(updatedRow.purchase_price) * parseFloat(value)
+            return updatedRow
           }
-          return updatedRow
-        }
-        return row
-      }),
-    }))
+          return row
+        }),
+      }))
+    }
   }
+
+  // const handleItemChange = async (
+  //   id: string,
+  //   field: keyof ItemRow,
+  //   value: string
+  // ) => {
+  //   // Update item detail
+  //   if (field === 'itemDetail') {
+  //     const selectedItem = items.find((item) => item.name === value)
+  //     if (selectedItem) {
+  //       const itemDetails = await getItemDetails(selectedItem.id)
+  //       setFormData((prevState) => ({
+  //         ...prevState,
+  //         itemRows: prevState.itemRows.map((row) =>
+  //           row.id === id
+  //             ? {
+  //                 ...row,
+  //                 itemDetail: value,
+  //                 costPrice: itemDetails.costPrice,
+  //                 sellingPrice: itemDetails.sellingPrice,
+  //               }
+  //             : row
+  //         ),
+  //       }))
+  //     }
+  //   } else {
+  //     setFormData((prevState) => ({
+  //       ...prevState,
+  //       itemRows: prevState.itemRows.map((row) => {
+  //         if (row.id === id) {
+  //           const updatedRow = { ...row, [field]: value }
+
+  //           if (['quantity', 'costPrice', 'sellingPrice'].includes(field)) {
+  //             const total = updatedRow.quantity * updatedRow.costPrice
+  //             return { ...updatedRow, total }
+  //           }
+  //           return updatedRow
+  //         }
+  //         return row
+  //       }),
+  //     }))
+  //   }
+  // }
 
   const totalAmount = calculateTotalAmount(
     formData.itemRows,
@@ -237,6 +297,57 @@ const PurchaseScreen: React.FC = () => {
       ))}
     </List>
   )
+
+//   const getItemDetails = async (itemId: number) => {
+//     try {
+//       const response = await fetch(
+//         `http://localhost:8000/api/item/get/${itemId}`,
+//         {
+//           method: 'GET',
+//           headers: {
+//             store: '1',
+//           },
+//         }
+//       )
+//       const data = await response.json()
+//       console.log(data)
+//       return {
+//         costPrice: data.costPrice,
+//         sellingPrice: data.sellingPrice,
+//       }
+//     } catch (error) {
+//       console.error('Error fetching item details:', error)
+//       return {
+//         costPrice: 0,
+//         sellingPrice: 0,
+//       }
+//     }
+//   }
+  const getItemDetails = async (itemId: number) => {
+    try {
+      const response = await fetch(
+        `http://localhost:8000/api/item/get/${itemId}`,
+        {
+          method: 'GET',
+          headers: {
+            store: '1',
+          },
+        }
+      )
+      const data = await response.json()
+      console.log(data)
+      return {
+        costPrice: data.cost_price,
+        sellingPrice: data.sale_price,
+      }
+    } catch (error) {
+      console.error('Error fetching item details:', error)
+      return {
+        costPrice: 0,
+        sellingPrice: 0,
+      }
+    }
+  }
   return (
     <Box sx={{ margin: 2 }}>
       <div className="heading">
@@ -328,11 +439,13 @@ const PurchaseScreen: React.FC = () => {
                       handleItemChange(row.id, 'itemDetail', e.target.value)
                     }
                   >
-                    {itemNames.map((itemName, index) => (
-                      <MenuItem key={index} value={itemName}>
-                        {itemName}
-                      </MenuItem>
-                    ))}
+                    <MenuItem value="">Select an item</MenuItem>{' '}
+                    {Array.isArray(items) &&
+                      items.map((item) => (
+                        <MenuItem key={item.id} value={item.name}>
+                          {item.name}
+                        </MenuItem>
+                      ))}
                   </TextField>
                 </TableCell>
                 <TableCell>
@@ -345,14 +458,22 @@ const PurchaseScreen: React.FC = () => {
                     }
                   />
                 </TableCell>
-
                 <TableCell>
+                  {/* <TextField
+                    fullWidth
+                    type="number"
+                    value={row.costPrice}
+                    onChange={(e) =>
+                      handleItemChange(row.id, 'costPrice', e.target.value)
+                    }
+                    
+                  /> */}
                   <TextField
                     fullWidth
                     type="number"
-                    value={row.purchase_price}
+                    value={row.costPrice || ''} // Ensure the value is always defined or set to an empty string
                     onChange={(e) =>
-                      handleItemChange(row.id, 'purchase_price', e.target.value)
+                      handleItemChange(row.id, 'costPrice', e.target.value)
                     }
                   />
                 </TableCell>
@@ -360,9 +481,9 @@ const PurchaseScreen: React.FC = () => {
                   <TextField
                     fullWidth
                     type="number"
-                    value={row.sale_price}
+                    value={row.sellingPrice || ''} // Ensure the value is always defined or set to an empty string
                     onChange={(e) =>
-                      handleItemChange(row.id, 'sale_price', e.target.value)
+                      handleItemChange(row.id, 'sellingPrice', e.target.value)
                     }
                   />
                 </TableCell>
@@ -434,7 +555,9 @@ const PurchaseScreen: React.FC = () => {
             <Grid item xs={6}>
               <TextField
                 fullWidth
-                label={`Discount (${formData.discountType === 'percentage' ? '%' : 'Rs.'})`}
+                label={`Discount (${
+                  formData.discountType === 'percentage' ? '%' : 'Rs.'
+                })`}
                 type="number"
                 value={formData.discountValue}
                 onChange={handleDiscountValueChange}
@@ -461,7 +584,6 @@ const PurchaseScreen: React.FC = () => {
           </Typography>
         </Grid>
 
-        <FileUpload files={files} setFiles={setFiles} />
         <Grid item xs={12}>
           <Box className="buttonContainer">
             <Button
