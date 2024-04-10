@@ -184,17 +184,51 @@ const PurchaseScreen: React.FC = () => {
       discountValue,
     }))
   }
+  const getItemIdByName = (itemName) => {
+    const selectedItem = itemDetails.find((item) => item.name === itemName)
+    return selectedItem ? selectedItem.id : null
+  }
 
-  const handleSubmit = () => {
-    let discountedTotal = totalAmount
-    if (formData.discountType === 'percentage') {
-      discountedTotal -= (totalAmount * formData.discountValue) / 100
-    } else if (formData.discountType === 'absolute') {
-      discountedTotal -= formData.discountValue
+  const handleSubmit = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/api/purchase', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': 'insomnia/8.6.1',
+          store: '1', // Assuming the store ID should be included in the headers
+        },
+        body: JSON.stringify({
+          vendor_name: formData.vendorName,
+          payment_method: formData.paymentMode,
+          discount: {
+            discount_type:
+              formData.discountType === 'percentage'
+                ? 'percentage'
+                : 'absolute',
+            amount: formData.discountValue,
+          },
+          paid_amount: formData.paidAmount,
+          total_amount: totalAmount - formData.discountValue,
+          items: formData.itemRows.map((row) => ({
+            item_id: getItemIdByName(row.itemDetail),
+            quantity: row.quantity,
+            total_amount: row.total,
+          })),
+          status: 'Active', // Assuming status should always be 'Active'
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to make purchase')
+      }
+
+      // Optionally, you can handle the response here if needed
+
+      console.log('Purchase successful')
+    } catch (error) {
+      console.error('Error making purchase:', error)
     }
-    console.log('Total after discount:', discountedTotal)
-    console.log(formData)
-    // Logic to send formData to the backend
   }
 
   const handleResetConfirmationClose = () => {
