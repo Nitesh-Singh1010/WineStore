@@ -70,11 +70,10 @@ const PurchaseScreen: React.FC = () => {
   const [files, setFiles] = useState<File[]>([])
   const [openResetConfirmation, setOpenResetConfirmation] = useState(false)
   const [openDraftsModal, setOpenDraftsModal] = useState(false)
-  const [drafts, setDrafts] = useState<FormData[]>([]) // State to store drafts
+  const [drafts, setDrafts] = useState<FormData[]>([])
   const [itemNames, setItemNames] = useState<string[]>([])
   const [itemDetails, setItemDetails] = useState<any[]>([])
   useEffect(() => {
-    // Fetch item names from API when component mounts
     fetchItemNames()
   }, [])
 
@@ -82,7 +81,7 @@ const PurchaseScreen: React.FC = () => {
     try {
       const response = await fetch('http://localhost:8000/api/items', {
         headers: {
-          store: '1', // Assuming store ID is '1'
+          store: '1',
         },
       })
       const responseData = await response.json()
@@ -137,18 +136,15 @@ const PurchaseScreen: React.FC = () => {
           const updatedRow = { ...row, [field]: value }
 
           if (field === 'itemDetail') {
-            // Find the item details from the itemDetails state based on the selected item name
             const selectedItem = itemDetails.find(
               (item: any) => item.name === value
             )
 
             if (selectedItem) {
-              // Autofill purchase price and sale price based on the selected item details
               updatedRow.purchase_price = parseFloat(selectedItem.cost_price)
               updatedRow.sale_price = parseFloat(selectedItem.sale_price)
             }
           } else if (field === 'quantity') {
-            // Calculate row total when quantity is entered
             updatedRow.total =
               parseFloat(updatedRow.purchase_price) * parseFloat(value)
           }
@@ -196,7 +192,7 @@ const PurchaseScreen: React.FC = () => {
         headers: {
           'Content-Type': 'application/json',
           'User-Agent': 'insomnia/8.6.1',
-          store: '1', // Assuming the store ID should be included in the headers
+          store: '1',
         },
         body: JSON.stringify({
           vendor_name: formData.vendorName,
@@ -215,16 +211,13 @@ const PurchaseScreen: React.FC = () => {
             quantity: row.quantity,
             total_amount: row.total,
           })),
-          status: 'Active', // Assuming status should always be 'Active'
+          status: 'Active',
         }),
       })
 
       if (!response.ok) {
         throw new Error('Failed to make purchase')
       }
-
-      // Optionally, you can handle the response here if needed
-
       console.log('Purchase successful')
     } catch (error) {
       console.error('Error making purchase:', error)
@@ -251,9 +244,8 @@ const PurchaseScreen: React.FC = () => {
 
   const saveAsDraft = () => {
     const draftWithVendor = { ...formData, vendorName: formData.vendorName }
-    setDrafts([...drafts, draftWithVendor]) // Saving current form data as a draft
-    // Sending formData to backend for saving draft by writing backend logic
-    setFormData(initialFormData) // Resetting the form data to initial state
+    setDrafts([...drafts, draftWithVendor])
+    setFormData(initialFormData)
   }
 
   const renderFileNames = () => (
