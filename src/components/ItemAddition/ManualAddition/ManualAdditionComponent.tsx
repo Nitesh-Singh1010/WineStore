@@ -362,6 +362,7 @@ const ManualAdditionComponent: React.FC = () => {
   }
   const [items, setItems] = useState<Item[]>([defaultItem])
   const [quantityModalOpen, setQuantityModalOpen] = useState<boolean>(false)
+  const [quantityCreatedState, setQuantityCreatedState] = useState<boolean>(false)
   const [newQuantity, setNewQuantity] = useState<string>('')
   const [newUnit, setNewUnit] = useState<string>('')
   const [invalidQuantityError, setInvalidQuantityError] = React.useState<
@@ -369,43 +370,39 @@ const ManualAdditionComponent: React.FC = () => {
   >(null)
   const { appLang } = useContext(AppLangContext)
   useEffect(() => {
-    const fetchQuantities = async () => {
-      try {
-        const response = await fetch(
-          'http://localhost:8000/api/quantity-type',
-          {
-            headers: {
-              store: '1',
-            },
-          }
-        )
-        if (response.ok) {
-          const responseData = await response.json()
-          console.log(responseData)
-          // Set the API response data to state
-          setResponseData(responseData)
-          // Check if data array exists in the response
-          if (responseData.data && Array.isArray(responseData.data)) {
-            // Extract quantity options from the API response data and set them to state
-            setQuantityOptions(
-              responseData.data.map(
-                (quantity: any) => `${quantity.value} ${quantity.size}`
-              )
-            )
-          } else {
-            console.error('Invalid API response data:', responseData)
-          }
-        } else {
-          console.error('Failed to fetch quantities:', response.statusText)
-        }
-      } catch (error) {
-        console.error('Error fetching quantities:', error)
-      }
-    }
-
     fetchQuantities()
-  }, [])
-
+  }, [quantityCreatedState])
+  const fetchQuantities = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/api/quantity-type', {
+        headers: {
+          store: '1',
+        },
+      })
+      if (response.ok) {
+        const responseData = await response.json()
+        // console.log(responseData)
+        setResponseData(responseData)
+        if (responseData.data && Array.isArray(responseData.data)) {
+          // setQuantityOptions(
+          //   responseData.data.map(
+          //     (quantity: any) => `${quantity.value} ${quantity.size}`
+          //   )
+          // )
+          const fetchedQuantityOptions = responseData.data.map(
+            (quantity: any) => `${quantity.value} ${quantity.size}`
+          )
+          setQuantityOptions(fetchedQuantityOptions)
+        } else {
+          console.error('Invalid API response data:', responseData)
+        }
+      } else {
+        console.error('Failed to fetch quantities:', response.statusText)
+      }
+    } catch (error) {
+      console.error('Error fetching quantities:', error)
+    }
+  }
   const itItemInvalid = (item: Item) => {
     return (
       !item.itemName ||
@@ -451,26 +448,6 @@ const ManualAdditionComponent: React.FC = () => {
     setItems(newItems)
   }
 
-  // const handleItemChange = (index: number, field: keyof Item, value: any) => {
-  //   const newItems = [...items]
-  //   if (field === 'quantity') {
-  //     // Check if responseData is available
-  //     if (responseData) {
-  //       // Extract the quantity type ID from the selected quantity string
-  //       const selectedQuantityIndex = quantityOptions.indexOf(value)
-  //       const selectedQuantityType = responseData.data[selectedQuantityIndex]
-  //       newItems[index] = {
-  //         ...newItems[index],
-  //         [field]: value,
-  //         quantityTypeId: selectedQuantityType.id, // Set the quantity type ID
-  //       }
-  //     }
-  //   } else {
-  //     newItems[index] = { ...newItems[index], [field]: value }
-  //   }
-  //   setItems(newItems)
-  // }
-
   const handleAddItem = () => {
     const lastItem = items[items.length - 1]
     if (!itItemInvalid(lastItem) && isValidPrice(lastItem)) {
@@ -485,12 +462,11 @@ const ManualAdditionComponent: React.FC = () => {
       name: item.itemName,
       cost_price: item.costPrice,
       sale_price: item.sellingPrice,
-      quantity_type_id: item.quantityTypeId, // Use the quantity type ID
+      quantity_type_id: item.quantityTypeId,
     }))
     try {
       for (const item of itemsToSend) {
         console.log('Sending item:', item)
-        //  API call:
         await fetch('http://localhost:8000/api/item/create', {
           method: 'POST',
           headers: {
@@ -519,51 +495,6 @@ const ManualAdditionComponent: React.FC = () => {
     setNewUnit('')
   }
 
-  // const handleAddQuantityModalSubmit = () => {
-  //   if ((newUnit === 'L' || newUnit === 'Kg') && parseInt(newQuantity) > 3) {
-  //     setInvalidQuantityError(
-  //       appLang['feature.manualAdditionPage.quantityRestrictionMessages'][0]
-  //     )
-  //     return
-  //   } else if (
-  //     (newUnit === 'g' || newUnit === 'ml') &&
-  //     parseInt(newQuantity) > 10000
-  //   ) {
-  //     setInvalidQuantityError(
-  //       appLang['feature.manualAdditionPage.quantityRestrictionMessages'][1]
-  //     )
-  //     return
-  //   }
-  //   if (newQuantity && newUnit) {
-  //     const payload = {
-  //       size: newUnit,
-  //       value: parseFloat(newQuantity),
-  //     }
-
-  //     fetch('http://localhost:8000/api/quantity-type', {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //         store: '1',
-  //       },
-  //       body: JSON.stringify(payload),
-  //     })
-  //       .then((response) => {
-  //         if (!response.ok) {
-  //           throw new Error('Network response was not ok')
-  //         }
-  //         return response.json()
-  //       })
-  //       .then((data) => {
-  //         console.log('Success:', data)
-  //       })
-  //       .catch((error) => {
-  //         console.error('Error:', error)
-  //       })
-  //     setQuantityOptions([...quantityOptions, `${newQuantity} ${newUnit}`])
-  //     handleCloseModal()
-  //   }
-  // }
   const handleAddQuantityModalSubmit = () => {
     if ((newUnit === 'L' || newUnit === 'Kg') && parseInt(newQuantity) > 3) {
       setInvalidQuantityError(
@@ -604,6 +535,7 @@ const ManualAdditionComponent: React.FC = () => {
           // Log quantityOptions array before and after updating
           console.log('quantityOptions before update:', quantityOptions)
           setQuantityOptions([...quantityOptions, `${newQuantity} ${newUnit}`])
+          setQuantityCreatedState(!quantityCreatedState)
           console.log('quantityOptions after update:', quantityOptions)
         })
         .catch((error) => {
@@ -617,7 +549,7 @@ const ManualAdditionComponent: React.FC = () => {
     {
       id: 'itemName',
       label: appLang['feature.item.screens.table.headers'][0],
-      component: (data, rowIndex) => (
+      component: (data: any, rowIndex: number) => (
         <TextField
           type="text"
           value={data}
@@ -631,7 +563,7 @@ const ManualAdditionComponent: React.FC = () => {
     {
       id: 'costPrice',
       label: appLang['feature.item.screens.table.headers'][1],
-      component: (data, rowIndex) => (
+      component: (data: any, rowIndex: number) => (
         <TextField
           type="number"
           value={data}
@@ -645,7 +577,7 @@ const ManualAdditionComponent: React.FC = () => {
     {
       id: 'sellingPrice',
       label: appLang['feature.item.screens.table.headers'][2],
-      component: (data, rowIndex) => (
+      component: (data: any, rowIndex: number) => (
         <TextField
           type="number"
           value={data}
@@ -693,7 +625,7 @@ const ManualAdditionComponent: React.FC = () => {
     {
       id: 'actions',
       label: appLang['feature.item.screens.table.headers'][5],
-      component: (rowIndex) => (
+      component: (rowIndex: number) => (
         <>
           <Tooltip
             title={appLang['feature.item.screens.tooltip&placeholders'][1]}

@@ -49,35 +49,6 @@ export default function ItemList() {
     getAllItems()
     // itemsSend()
   }, [])
-  const itemsSend = async () => {
-    try {
-      const response = await fetch('http://localhost:8000/api/item/create', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          store: '1',
-        },
-        body: JSON.stringify({
-          name: 'BP',
-          cost_price: 400,
-          sale_price: 900,
-          quantity: {
-            size: 'FULL',
-            value: 4,
-          },
-        }),
-      })
-      if (!response.ok) {
-        throw new Error(
-          `HTTP error! status in POST request: ${response.status}`
-        )
-      }
-      const data = await response.json()
-      console.log('Success:', data)
-    } catch (error) {
-      console.error('Error in POST request:', error)
-    }
-  }
 
   const itemsFetch = async (itemId: number) => {
     try {
@@ -248,13 +219,10 @@ export default function ItemList() {
   }
 
   const deleteRow = async (index: number) => {
-    // setRows((prevRows) => prevRows.filter((_, rowIndex) => rowIndex !== index))
     const itemIdToDelete = rows[index].id
     try {
-      // Call the updateItemStatus API with the ID of the row being deleted
       await updateItemStatus(itemIdToDelete, 'Deleted')
 
-      // Remove the deleted row from the rows state
       setRows((prevRows) =>
         prevRows.filter((_, rowIndex) => rowIndex !== index)
       )
@@ -273,7 +241,7 @@ export default function ItemList() {
             'Content-Type': 'application/json',
             store: '1',
           },
-          body: JSON.stringify(lastEditedItem), // Assuming lastEditedItem contains updated values
+          body: JSON.stringify(lastEditedItem),
         }
       )
       if (response.ok) {
@@ -413,6 +381,7 @@ export default function ItemList() {
                 }
                 fullWidth
                 margin="normal"
+                disabled
               />
               <TextField
                 label={appLang['feature.item.screens.table.headers'][1]}
@@ -438,31 +407,12 @@ export default function ItemList() {
                 fullWidth
                 margin="normal"
               />
-              {/* <TextField
-                label={appLang['feature.item.screens.table.headers'][3]}
-                value={lastEditedItem.quantity.value}
-                onChange={(e) =>
-                  setlastEditedItem((prev) =>
-                    prev
-                      ? {
-                          ...prev,
-                          quantity: {
-                            ...prev.quantity,
-                            value: Number(e.target.value),
-                          },
-                        }
-                      : null
-                  )
-                }
-                fullWidth
-                margin="normal"
-                disabled
-              /> */}
               <TextField
                 label={appLang['feature.item.screens.table.headers'][3]}
                 value={`${lastEditedItem.quantity.value}-${lastEditedItem.quantity.size}`}
                 fullWidth
                 margin="normal"
+                disabled
               />
             </>
           )}
