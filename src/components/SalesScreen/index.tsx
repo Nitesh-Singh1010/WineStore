@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useContext, useState } from 'react'
 import {
   Box,
   Button,
@@ -15,15 +15,12 @@ import {
   TextField,
   Typography,
   ListItemIcon,
-  List,
-  ListItem,
-  ListItemText,
   IconButton,
 } from '@mui/material'
 import DeleteIcon from '@mui/icons-material/Delete'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
-import lang from '../../lang-en.json'
+import { AppLangContext } from '@Contexts'
 import vars from '../../vars.json'
 import './index.scss'
 import ResetConfirmationDialog from '@components/common/ResetConfirmationDialog/ResetConfirmationDialog'
@@ -61,25 +58,11 @@ const SalesScreen: React.FC = () => {
   }
 
   const [formData, setFormData] = useState<FormData>(initialFormData)
-  const [files, setFiles] = useState<File[]>([])
   const [openResetConfirmation, setOpenResetConfirmation] = useState(false)
   const [drafts, setDrafts] = useState<FormData[]>([])
   const [openDraftsModal, setOpenDraftsModal] = useState(false)
   const [idCounter, setIdCounter] = useState<number>(0)
-
-  useEffect(() => {
-    // Load customer name from local storage
-    // const storedCustomerName = localStorage.getItem('customerName')
-    // if (storedCustomerName) {
-    //   setFormData((prevFormData) => ({
-    //     ...prevFormData,
-    //     customerName: storedCustomerName,
-    //   }))
-    // }
-
-    // Adding one default item row when component mounts
-    addItemRow()
-  }, [])
+  const { appLang } = useContext(AppLangContext)
   const addItemRow = () => {
     const newItemRow: ItemRow = {
       id: idCounter + 1,
@@ -103,7 +86,7 @@ const SalesScreen: React.FC = () => {
       itemRows: prevState.itemRows.filter((row) => row.id !== id),
     }))
 
-    setIdCounter((prevCounter) => prevCounter - 1) // Decrementing the counter
+    setIdCounter((prevCounter) => prevCounter - 1)
   }
   const handleResetConfirmationClose = () => {
     setOpenResetConfirmation(false)
@@ -172,23 +155,19 @@ const SalesScreen: React.FC = () => {
   }
 
   const handleSubmit = () => {
-    let discountedTotal = totalAmount
-    if (formData.discountType === 'percentage') {
-      discountedTotal -= (totalAmount * formData.discountValue) / 100
-    } else if (formData.discountType === 'absolute') {
-      discountedTotal -= formData.discountValue
-    }
-    // console.log('Total after discount:', discountedTotal)
-    // console.log(formData)
-    // Logic to send formData to the backend
+    // let discountedTotal = totalAmount
+    // if (formData.discountType === 'percentage') {
+    //   discountedTotal -= (totalAmount * formData.discountValue) / 100
+    // } else if (formData.discountType === 'absolute') {
+    //   discountedTotal -= formData.discountValue
+    // }
+    //api call to send data to backend
+    setFormData(initialFormData)
   }
 
   const saveAsDraft = () => {
-    // Storing customer name in local storage
-    // localStorage.setItem('customerName', formData.customerName)
-
     setDrafts([...drafts, formData])
-    setFormData(initialFormData) // Resetting the form data to initial state
+    setFormData(initialFormData)
   }
   const handlePrintBill = () => {
     alert('Printing Bill...')
@@ -200,20 +179,18 @@ const SalesScreen: React.FC = () => {
           <ListItemIcon>
             <ShoppingCartIcon />
           </ListItemIcon>
-          {lang['feature.salesScreen.hardTexts'].salesOrderTitle}
+          {appLang['feature.salesScreen.salesOrderTitle']}
         </Typography>
         <IconButton onClick={() => setOpenDraftsModal(true)}>
           <ArrowDropDownIcon />
-          <Typography>
-            {lang['feature.salesScreen.hardTexts'].viewDrafts}
-          </Typography>
+          <Typography>{appLang['feature.salesScreen.viewDrafts']}</Typography>
         </IconButton>
       </div>
       <Grid container spacing={3} mt={2}>
         <Grid item xs={12} md={6}>
           <TextField
             fullWidth
-            label="Customer's Name"
+            label={appLang['feature.salesScreen.customerNameLabel']}
             value={formData.customerName}
             onChange={(e) =>
               setFormData({ ...formData, customerName: e.target.value })
@@ -225,7 +202,7 @@ const SalesScreen: React.FC = () => {
           <TextField
             fullWidth
             type="date"
-            label="Sales Order Date"
+            label={appLang['feature.salesScreen.salesOrderDateLabel']}
             InputLabelProps={{ shrink: true }}
             value={formData.salesOrderDate}
             onChange={(e) =>
@@ -242,19 +219,19 @@ const SalesScreen: React.FC = () => {
             <TableHead>
               <TableRow>
                 <TableCell width="50%">
-                  {lang['feature.salesScreen.hardTexts'].itemDetailColumnName}
+                  {appLang['feature.salesScreen.itemDetailColumnName']}
                 </TableCell>
                 <TableCell>
-                  {lang['feature.salesScreen.hardTexts'].quantityColumnName}
+                  {appLang['feature.salesScreen.quantityColumnName']}
                 </TableCell>
                 <TableCell>
-                  {lang['feature.salesScreen.hardTexts'].rateColumnName}
+                  {appLang['feature.salesScreen.rateColumnName']}
                 </TableCell>
                 <TableCell>
-                  {lang['feature.salesScreen.hardTexts'].totalColumnName}
+                  {appLang['feature.salesScreen.totalColumnName']}
                 </TableCell>
                 <TableCell>
-                  {lang['feature.salesScreen.hardTexts'].actionColumnName}
+                  {appLang['feature.salesScreen.actionColumnName']}
                 </TableCell>
               </TableRow>
             </TableHead>
@@ -319,7 +296,7 @@ const SalesScreen: React.FC = () => {
       <Grid item xs={12}>
         <Box display="flex" justifyContent="center">
           <Button onClick={addItemRow} variant="contained" sx={{ my: 3 }}>
-            Add Item
+            {appLang['feature.salesScreen.addItemButton']}
           </Button>
         </Box>
       </Grid>
@@ -327,12 +304,12 @@ const SalesScreen: React.FC = () => {
         <Grid item xs={12} md={6}>
           <FormControl fullWidth margin="normal">
             <InputLabel id="payment-mode-label">
-              {lang['feature.salesScreen.hardTexts'].paymentModeLabel}
+              {appLang['feature.salesScreen.paymentModeLabel']}
             </InputLabel>
             <Select
               labelId="payment-mode-label"
               value={formData.paymentMode}
-              label={lang['feature.salesScreen.hardTexts'].paymentModeLabel}
+              label={appLang['feature.salesScreen.paymentModeLabel']}
               onChange={(e) =>
                 setFormData({ ...formData, paymentMode: e.target.value })
               }
@@ -353,7 +330,7 @@ const SalesScreen: React.FC = () => {
             <Grid item xs={6}>
               <FormControl fullWidth margin="normal">
                 <InputLabel>
-                  {lang['feature.salesScreen.hardTexts'].discountTypeLabel}
+                  {appLang['feature.salesScreen.discountTypeLabel']}
                 </InputLabel>
                 <Select
                   value={formData.discountType}
@@ -361,15 +338,12 @@ const SalesScreen: React.FC = () => {
                 >
                   <MenuItem value="percentage">
                     {
-                      lang['feature.salesScreen.hardTexts'].discountValueLabel
+                      appLang['feature.salesScreen.discountValueLabel']
                         .percentage
                     }
                   </MenuItem>
                   <MenuItem value="absolute">
-                    {
-                      lang['feature.salesScreen.hardTexts'].discountValueLabel
-                        .absolute
-                    }
+                    {appLang['feature.salesScreen.discountValueLabel'].absolute}
                   </MenuItem>
                 </Select>
               </FormControl>
@@ -389,7 +363,7 @@ const SalesScreen: React.FC = () => {
         <Grid item xs={12} md={6}>
           <TextField
             fullWidth
-            label={lang['feature.salesScreen.hardTexts'].paidAmountLabel}
+            label={appLang['feature.salesScreen.paidAmountLabel']}
             value={formData.paidAmount}
             onChange={(e) =>
               setFormData({ ...formData, paidAmount: e.target.value })
@@ -399,7 +373,7 @@ const SalesScreen: React.FC = () => {
         </Grid>
         <Grid item xs={12} md={6}>
           <Typography variant="h6" my={5} className="totalAmount">
-            {lang['feature.salesScreen.hardTexts'].totalAmountLabel}{' '}
+            {appLang['feature.salesScreen.totalAmountLabel']}{' '}
             {(totalAmount - formData.discountValue).toFixed(2)}
           </Typography>
         </Grid>
@@ -411,7 +385,7 @@ const SalesScreen: React.FC = () => {
               color="primary"
               sx={{ mt: 2, mr: 2 }}
             >
-              {lang['feature.salesScreen.hardTexts'].printBillButton}
+              {appLang['feature.salesScreen.printBillButton']}
             </Button>
             <Button
               variant="contained"
@@ -419,14 +393,14 @@ const SalesScreen: React.FC = () => {
               sx={{ mt: 2, mr: 2 }}
               onClick={() => setOpenResetConfirmation(true)}
             >
-              {lang['feature.salesScreen.hardTexts'].resetButton}
+              {appLang['feature.salesScreen.resetButton']}
             </Button>
             <Button
               onClick={saveAsDraft}
               variant="contained"
               sx={{ mt: 2, mr: 2 }}
             >
-              {lang['feature.salesScreen.hardTexts'].saveDraftButton}
+              {appLang['feature.salesScreen.saveDraftButton']}
             </Button>
             <Button
               onClick={handleSubmit}
@@ -434,7 +408,7 @@ const SalesScreen: React.FC = () => {
               color="primary"
               sx={{ mt: 2 }}
             >
-              {lang['feature.salesScreen.hardTexts'].confirmButton}
+              {appLang['feature.salesScreen.confirmButton']}
             </Button>
           </Box>
         </Grid>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react'
 import {
   Dialog,
   DialogTitle,
@@ -10,16 +10,16 @@ import {
   ListItem,
   ListItemText,
   IconButton,
-} from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import lang from '../../lang-en.json';
-import { FormData as SalesFormData } from './index'; // Renaming the FormData type
+} from '@mui/material'
+import DeleteIcon from '@mui/icons-material/Delete'
+import { AppLangContext } from '@Contexts'
+import { FormData as SalesFormData } from './index'
 
 interface DraftsDialogProps {
-  open: boolean;
-  onClose: () => void;
-  drafts: SalesFormData[]; // Using SalesFormData instead of FormData
-  deleteDraft: (index: number) => void;
+  open: boolean
+  onClose: () => void
+  drafts: SalesFormData[]
+  deleteDraft: (index: number) => void
 }
 
 const DraftsDialog: React.FC<DraftsDialogProps> = ({
@@ -28,12 +28,13 @@ const DraftsDialog: React.FC<DraftsDialogProps> = ({
   drafts,
   deleteDraft,
 }) => {
+  const { appLang } = useContext(AppLangContext)
   return (
     <Dialog open={open} onClose={onClose}>
       <DialogTitle>Drafts</DialogTitle>
       <DialogContent>
         <DialogContentText>
-          {lang['feature.salesScreen.hardTexts'].selectDraftMessage}
+          {appLang['feature.salesScreen.selectDraftMessage']}
         </DialogContentText>
         <List>
           {drafts.map((draft, index) => (
@@ -55,11 +56,12 @@ const DraftsDialog: React.FC<DraftsDialogProps> = ({
         </List>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Close</Button>
+        <Button onClick={onClose}>
+          {appLang['feature.common.templates.popups.general.close.button']}
+        </Button>
       </DialogActions>
     </Dialog>
-  );
-};
+  )
+}
 
-export default DraftsDialog;
-
+export default DraftsDialog

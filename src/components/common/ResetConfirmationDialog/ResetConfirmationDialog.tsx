@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react'
 import {
   Dialog,
   DialogTitle,
@@ -6,13 +6,13 @@ import {
   DialogContentText,
   DialogActions,
   Button,
-} from '@mui/material';
-import lang from '../../../lang-en.json'
+} from '@mui/material'
+import { AppLangContext } from '@Contexts'
 
 interface ResetConfirmationDialogProps {
-  open: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
+  open: boolean
+  onClose: () => void
+  onConfirm: () => void
 }
 
 const ResetConfirmationDialog: React.FC<ResetConfirmationDialogProps> = ({
@@ -20,26 +20,27 @@ const ResetConfirmationDialog: React.FC<ResetConfirmationDialogProps> = ({
   onClose,
   onConfirm,
 }) => {
+  const { appLang } = useContext(AppLangContext)
   return (
     <Dialog open={open} onClose={onClose}>
       <DialogTitle>
-        {lang['feature.salesScreen.hardTexts'].resetConfirmationTitle}
+        {appLang['feature.salesScreen.resetConfirmationTitle']}
       </DialogTitle>
       <DialogContent>
         <DialogContentText>
-          {lang['feature.salesScreen.hardTexts'].resetConfirmationMessage}
+          {appLang['feature.salesScreen.resetConfirmationMessage']}
         </DialogContentText>
       </DialogContent>
       <DialogActions>
         <Button onClick={onConfirm} color="primary">
-          {lang['feature.salesScreen.hardTexts'].yesButton}
+          {appLang['feature.common.templates.popups.general.yes.button']}
         </Button>
         <Button onClick={onClose} color="primary">
-          {lang['feature.salesScreen.hardTexts'].cancelButton}
+          {appLang['feature.common.templates.popups.general.cancel.button']}
         </Button>
       </DialogActions>
     </Dialog>
-  );
-};
+  )
+}
 
-export default ResetConfirmationDialog;
+export default ResetConfirmationDialog

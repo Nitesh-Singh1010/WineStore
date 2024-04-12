@@ -9,7 +9,6 @@ import baseVar from './vars.json'
 import baseLang from './lang-en.json'
 import SalesScreen from '@components/SalesScreen'
 
-
 export interface INavItem {
   disabled?: boolean
   icon: string
@@ -44,7 +43,8 @@ const App: React.FC = () => {
           <Router>
             <div className="app-container">
               <Routes>
-                <Route path="/" element={<SalesScreen/>} />
+                <Route path="/" element={<HomeScreen />} />
+                <Route path="/salesorder" element={<SalesScreen />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </div>
