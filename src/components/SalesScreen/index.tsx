@@ -21,7 +21,7 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
 import { AppLangContext } from '@Contexts'
-import vars from '../../vars.json'
+import { AppStateContext, IAppStateContext } from '@Contexts'
 import './index.scss'
 import ResetConfirmationDialog from '@components/common/ResetConfirmationDialog/ResetConfirmationDialog'
 import DraftsDialog from './DraftsDialog'
@@ -63,6 +63,7 @@ const SalesScreen: React.FC = () => {
   const [openDraftsModal, setOpenDraftsModal] = useState(false)
   const [idCounter, setIdCounter] = useState<number>(0)
   const { appLang } = useContext(AppLangContext)
+  const { appConfig } = useContext<IAppStateContext>(AppStateContext)
   const addItemRow = () => {
     const newItemRow: ItemRow = {
       id: idCounter + 1,
@@ -248,16 +249,16 @@ const SalesScreen: React.FC = () => {
                       }
                     >
                       <MenuItem value="Item 1">
-                        {vars['feature.itemDetails'][0]}
+                        {appConfig['feature.itemDetails'][0]}
                       </MenuItem>
                       <MenuItem value="Item 2">
-                        {vars['feature.itemDetails'][1]}
+                        {appConfig['feature.itemDetails'][1]}
                       </MenuItem>
                       <MenuItem value="Item 3">
-                        {vars['feature.itemDetails'][2]}
+                        {appConfig['feature.itemDetails'][2]}
                       </MenuItem>
                       <MenuItem value="Item 4">
-                        {vars['feature.itemDetails'][3]}
+                        {appConfig['feature.itemDetails'][3]}
                       </MenuItem>
                     </TextField>
                   </TableCell>
@@ -315,12 +316,14 @@ const SalesScreen: React.FC = () => {
               }
             >
               <MenuItem value="Cash">
-                {vars['feature.paymentModes'][0]}
+                {appConfig['feature.paymentModes'][0]}
               </MenuItem>
               <MenuItem value="Card">
-                {vars['feature.paymentModes'][1]}
+                {appConfig['feature.paymentModes'][1]}
               </MenuItem>
-              <MenuItem value="UPI">{vars['feature.paymentModes'][2]}</MenuItem>
+              <MenuItem value="UPI">
+                {appConfig['feature.paymentModes'][2]}
+              </MenuItem>
             </Select>
           </FormControl>
         </Grid>
