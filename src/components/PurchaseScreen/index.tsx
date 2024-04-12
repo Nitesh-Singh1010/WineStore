@@ -3,12 +3,10 @@ import {
   Button,
   FormControl,
   Grid,
-  Paper,
   IconButton,
   InputLabel,
   MenuItem,
   Select,
-  ListItemSecondaryAction,
   Table,
   TableBody,
   TableCell,
@@ -26,13 +24,13 @@ import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import { v4 as uuidv4 } from 'uuid'
 import React, { useState, useCallback, useContext, useEffect } from 'react'
-import { SelectChangeEvent } from '@mui/material/Select'
 import FileUpload from './FileUpload'
 import './index.scss'
 import ResetConfirmationDialog from '@components/common/ResetConfirmationDialog/ResetConfirmationDialog'
 import DraftsDialog from '@components/PurchaseScreen/DraftsDialog'
 import { calculateTotalAmount } from '../../utils'
 import { AppLangContext } from '@Contexts'
+import { FormHelperText } from '@mui/material'
 interface ItemRow {
   id: string
   itemDetail: string
@@ -73,6 +71,8 @@ const PurchaseScreen: React.FC = () => {
   const [drafts, setDrafts] = useState<FormData[]>([])
   const [itemNames, setItemNames] = useState<string[]>([])
   const [itemDetails, setItemDetails] = useState<any[]>([])
+  const [formSubmitted, setFormSubmitted] = useState(false)
+  const [successAlert, setSuccessAlert] = useState(false)
   useEffect(() => {
     fetchItemNames()
   }, [])
@@ -186,6 +186,18 @@ const PurchaseScreen: React.FC = () => {
   }
 
   const handleSubmit = async () => {
+    setFormSubmitted(true)
+    const requiredFields = [
+      'vendorName',
+      'purchaseDate',
+      'paymentMode',
+      'paidAmount',
+    ]
+    const emptyFields = requiredFields.filter((field) => !formData[field])
+    if (emptyFields.length > 0) {
+      return
+    }
+
     try {
       const response = await fetch('http://localhost:8000/api/purchase', {
         method: 'POST',
@@ -218,7 +230,11 @@ const PurchaseScreen: React.FC = () => {
       if (!response.ok) {
         throw new Error('Failed to make purchase')
       }
-      console.log('Purchase successful')
+      setSuccessAlert(true)
+      setTimeout(() => {
+        setFormData(initialFormData)
+        setSuccessAlert(false)
+      }, 1500)
     } catch (error) {
       console.error('Error making purchase:', error)
     }
@@ -265,6 +281,18 @@ const PurchaseScreen: React.FC = () => {
   )
   return (
     <Box sx={{ margin: 2 }}>
+      {successAlert && (
+        <div
+          style={{
+            backgroundColor: '#4caf50',
+            color: '#ffffff',
+            padding: '1rem',
+            marginBottom: '1rem',
+          }}
+        >
+          Purchase order successful!
+        </div>
+      )}
       <div className="heading">
         <Typography variant="h4" component="h1">
           Make a purchase
@@ -287,13 +315,21 @@ const PurchaseScreen: React.FC = () => {
               setFormData({ ...formData, vendorName: e.target.value })
             }
             margin="normal"
+            required
+            error={formSubmitted && !formData.vendorName}
           />
+          {formSubmitted && !formData.vendorName && (
+            <FormHelperText style={{ color: 'red' }}>
+              Vendor Name is required.
+            </FormHelperText>
+          )}
         </Grid>
         <Grid item xs={12} md={6}>
           <TextField
             fullWidth
             type="date"
             label="Purchase Date"
+            required
             InputLabelProps={{ shrink: true }}
             value={formData.purchaseDate}
             onChange={(e) =>
@@ -349,6 +385,8 @@ const PurchaseScreen: React.FC = () => {
                   <TextField
                     fullWidth
                     select
+                    required
+                    label="Select Items"
                     value={row.itemDetail}
                     onChange={(e) =>
                       handleItemChange(row.id, 'itemDetail', e.target.value)
@@ -366,16 +404,26 @@ const PurchaseScreen: React.FC = () => {
                     fullWidth
                     type="number"
                     value={row.quantity}
+                    required
                     onChange={(e) =>
                       handleItemChange(row.id, 'quantity', e.target.value)
                     }
+                    InputProps={{ inputProps: { min: 1 } }}
+                    error={formSubmitted && row.quantity == 0}
                   />
+                  {formSubmitted && row.quantity == 0 && (
+                    <FormHelperText style={{ color: 'red' }}>
+                      Quantity is Required.
+                    </FormHelperText>
+                  )}
                 </TableCell>
-
                 <TableCell>
                   <TextField
                     fullWidth
                     type="number"
+                    InputProps={{
+                      readOnly: true,
+                    }}
                     value={row.purchase_price}
                     onChange={(e) =>
                       handleItemChange(row.id, 'purchase_price', e.target.value)
@@ -386,6 +434,9 @@ const PurchaseScreen: React.FC = () => {
                   <TextField
                     fullWidth
                     type="number"
+                    InputProps={{
+                      readOnly: true,
+                    }}
                     value={row.sale_price}
                     onChange={(e) =>
                       handleItemChange(row.id, 'sale_price', e.target.value)
@@ -465,6 +516,7 @@ const PurchaseScreen: React.FC = () => {
                 value={formData.discountValue}
                 onChange={handleDiscountValueChange}
                 margin="normal"
+                InputProps={{ inputProps: { min: 0 } }}
               />
             </Grid>
           </Grid>
@@ -478,7 +530,14 @@ const PurchaseScreen: React.FC = () => {
               setFormData({ ...formData, paidAmount: e.target.value })
             }
             margin="normal"
+            required
+            error={formSubmitted && !formData.paidAmount}
           />
+          {formSubmitted && !formData.paidAmount && (
+            <FormHelperText style={{ color: 'red' }}>
+              Paid Amount is required.
+            </FormHelperText>
+          )}
         </Grid>
         <Grid item xs={12} md={10}>
           <Typography variant="h6" className="totalAmountText">
