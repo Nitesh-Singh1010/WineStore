@@ -197,6 +197,7 @@ const SalesScreen: React.FC = () => {
               setFormData({ ...formData, customerName: e.target.value })
             }
             margin="normal"
+            required
           />
         </Grid>
         <Grid item xs={12} md={6}>
@@ -270,6 +271,7 @@ const SalesScreen: React.FC = () => {
                       onChange={(e) =>
                         handleItemChange(row.id, 'quantity', e.target.value)
                       }
+                      InputProps={{ inputProps: { min: 1 } }}
                     />
                   </TableCell>
                   <TableCell>
@@ -280,6 +282,7 @@ const SalesScreen: React.FC = () => {
                       onChange={(e) =>
                         handleItemChange(row.id, 'rate', e.target.value)
                       }
+                      InputProps={{ inputProps: { min: 1 } }}
                     />
                   </TableCell>
                   <TableCell>{row.total.toFixed(2)}</TableCell>
@@ -359,6 +362,7 @@ const SalesScreen: React.FC = () => {
                 value={formData.discountValue}
                 onChange={handleDiscountValueChange}
                 margin="normal"
+                InputProps={{ inputProps: { min: 0 } }}
               />
             </Grid>
           </Grid>
