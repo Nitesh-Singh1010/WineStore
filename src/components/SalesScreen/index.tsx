@@ -20,8 +20,7 @@ import {
 import DeleteIcon from '@mui/icons-material/Delete'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
-import { AppLangContext } from '@Contexts'
-import { AppStateContext, IAppStateContext } from '@Contexts'
+import { AppStateContext, IAppStateContext, AppLangContext } from '@Contexts'
 import './index.scss'
 import ResetConfirmationDialog from '@components/common/ResetConfirmationDialog/ResetConfirmationDialog'
 import DraftsDialog from './DraftsDialog'
@@ -65,6 +64,19 @@ const SalesScreen: React.FC = () => {
   const { appLang } = useContext(AppLangContext)
   const { appConfig } = useContext<IAppStateContext>(AppStateContext)
   const addItemRow = () => {
+    if (formData.itemRows.length > 0) {
+      const lastItem = formData.itemRows[formData.itemRows.length - 1]
+      if (
+        !lastItem.itemDetail ||
+        lastItem.quantity === 0 ||
+        lastItem.rate === 0
+      ) {
+        alert(
+          'Please fill all three fields for the previous item before adding a new one.'
+        )
+        return
+      }
+    }
     const newItemRow: ItemRow = {
       id: idCounter + 1,
       itemDetail: '',
@@ -156,12 +168,43 @@ const SalesScreen: React.FC = () => {
   }
 
   const handleSubmit = () => {
-    // let discountedTotal = totalAmount
-    // if (formData.discountType === 'percentage') {
-    //   discountedTotal -= (totalAmount * formData.discountValue) / 100
-    // } else if (formData.discountType === 'absolute') {
-    //   discountedTotal -= formData.discountValue
-    // }
+    const hasIncompleteItem = formData.itemRows.some(
+      (item) => !item.itemDetail || item.quantity === 0 || item.rate === 0
+    )
+
+    if (hasIncompleteItem) {
+      alert('Please fill all three fields for all items before submission.')
+      return
+    }
+    if (
+      !formData.customerName ||
+      !formData.paymentMode ||
+      !formData.paidAmount
+    ) {
+      alert(
+        'Please fill all required fields (Customer Name, Payment Mode, and Paid Amount).'
+      )
+      return
+    }
+
+    const totalAmount = formData.itemRows.reduce(
+      (acc, curr) => acc + curr.total,
+      0
+    )
+
+    let totalAmountAfterDiscount = totalAmount
+
+    if (formData.discountType === 'percentage') {
+      const discountAmount = (formData.discountValue / 100) * totalAmount
+      totalAmountAfterDiscount = totalAmount - discountAmount
+    } else if (formData.discountType === 'absolute') {
+      totalAmountAfterDiscount = totalAmount - formData.discountValue
+    }
+
+    if (totalAmountAfterDiscount < 0) {
+      alert('Total amount after discount cannot be negative.')
+      return
+    }
     //api call to send data to backend
     setFormData(initialFormData)
   }
@@ -248,7 +291,15 @@ const SalesScreen: React.FC = () => {
                       onChange={(e) =>
                         handleItemChange(row.id, 'itemDetail', e.target.value)
                       }
+                      SelectProps={{
+                        displayEmpty: true,
+                        renderValue: (value) =>
+                          value === '' ? 'Select Item' : value,
+                      }}
                     >
+                      <MenuItem value="" disabled>
+                        Select Item
+                      </MenuItem>
                       <MenuItem value="Item 1">
                         {appConfig['feature.itemDetails'][0]}
                       </MenuItem>
@@ -376,12 +427,16 @@ const SalesScreen: React.FC = () => {
               setFormData({ ...formData, paidAmount: e.target.value })
             }
             margin="normal"
+            required
           />
         </Grid>
         <Grid item xs={12} md={6}>
           <Typography variant="h6" my={5} className="totalAmount">
             {appLang['feature.salesScreen.totalAmountLabel']}{' '}
-            {(totalAmount - formData.discountValue).toFixed(2)}
+            {(formData.discountType === 'percentage'
+              ? totalAmount - (formData.discountValue / 100) * totalAmount
+              : totalAmount - formData.discountValue
+            ).toFixed(2)}
           </Typography>
         </Grid>
         <Grid item xs={12}>
