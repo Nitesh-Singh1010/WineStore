@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useState, useEffect } from 'react'
 import {
   Box,
   Button,
@@ -32,6 +32,10 @@ interface ItemRow {
   rate: number
   total: number
 }
+interface Item {
+  id: number
+  name: string
+}
 
 export interface FormData {
   customerName: string
@@ -63,6 +67,28 @@ const SalesScreen: React.FC = () => {
   const [idCounter, setIdCounter] = useState<number>(0)
   const { appLang } = useContext(AppLangContext)
   const { appConfig } = useContext<IAppStateContext>(AppStateContext)
+  const [items, setItems] = useState<Item[]>([])
+  useEffect(() => {
+    fetchItems()
+  }, [])
+
+  const fetchItems = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/api/items', {
+        headers: {
+          store: '1',
+        },
+      })
+      if (response.ok) {
+        const data = await response.json()
+        setItems(data.data)
+      } else {
+        console.error('Failed to fetch items')
+      }
+    } catch (error) {
+      console.error('Error fetching items:', error)
+    }
+  }
   const addItemRow = () => {
     if (formData.itemRows.length > 0) {
       const lastItem = formData.itemRows[formData.itemRows.length - 1]
@@ -101,6 +127,10 @@ const SalesScreen: React.FC = () => {
 
     setIdCounter((prevCounter) => prevCounter - 1)
   }
+  const findItemByName = (name: string) => {
+    return items.find((item) => item.name === name) || null
+  }
+
   const handleResetConfirmationClose = () => {
     setOpenResetConfirmation(false)
   }
@@ -118,27 +148,35 @@ const SalesScreen: React.FC = () => {
     updatedDrafts.splice(index, 1)
     setDrafts(updatedDrafts)
   }
-
   const handleItemChange = (
     id: number,
     field: keyof ItemRow,
-    value: string
+    value: string | Item | null
   ) => {
-    setFormData((prevState) => ({
-      ...prevState,
-      itemRows: prevState.itemRows.map((row) => {
-        if (row.id === id) {
-          const updatedRow = { ...row, [field]: value }
-
-          if (['quantity', 'rate'].includes(field)) {
-            const total = updatedRow.quantity * updatedRow.rate
-            return { ...updatedRow, total }
+    if (field === 'itemDetail') {
+      const selectedItem = value as Item | null
+      const selectedName = selectedItem ? selectedItem.name : ''
+      setFormData((prevState) => ({
+        ...prevState,
+        itemRows: prevState.itemRows.map((row) =>
+          row.id === id ? { ...row, itemDetail: selectedName } : row
+        ),
+      }))
+    } else {
+      setFormData((prevState) => ({
+        ...prevState,
+        itemRows: prevState.itemRows.map((row) => {
+          if (row.id === id) {
+            const newValue = parseFloat(value as string)
+            const quantity = field === 'quantity' ? newValue : row.quantity
+            const rate = field === 'rate' ? newValue : row.rate
+            const total = quantity * rate
+            return { ...row, [field]: newValue, total }
           }
-          return updatedRow
-        }
-        return row
-      }),
-    }))
+          return row
+        }),
+      }))
+    }
   }
 
   const totalAmount = formData.itemRows.reduce(
@@ -167,7 +205,7 @@ const SalesScreen: React.FC = () => {
     }))
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const hasIncompleteItem = formData.itemRows.some(
       (item) => !item.itemDetail || item.quantity === 0 || item.rate === 0
     )
@@ -187,26 +225,48 @@ const SalesScreen: React.FC = () => {
       return
     }
 
-    const totalAmount = formData.itemRows.reduce(
-      (acc, curr) => acc + curr.total,
-      0
-    )
+    const itemsData = formData.itemRows.map((row) => ({
+      item_id: findItemByName(row.itemDetail)?.id,
+      quantity: row.quantity,
+      total_amount: row.total,
+    }))
 
-    let totalAmountAfterDiscount = totalAmount
-
-    if (formData.discountType === 'percentage') {
-      const discountAmount = (formData.discountValue / 100) * totalAmount
-      totalAmountAfterDiscount = totalAmount - discountAmount
-    } else if (formData.discountType === 'absolute') {
-      totalAmountAfterDiscount = totalAmount - formData.discountValue
+    const requestData = {
+      vendor_name: formData.customerName,
+      payment_method: formData.paymentMode,
+      discount: {
+        discount_type: formData.discountType,
+        amount: formData.discountValue,
+      },
+      paid_amount: formData.paidAmount,
+      total_amount: totalAmount,
+      items: itemsData,
+      status: 'Active',
     }
 
-    if (totalAmountAfterDiscount < 0) {
-      alert('Total amount after discount cannot be negative.')
-      return
+    try {
+      const response = await fetch('http://localhost:8000/api/sale', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          store: '1',
+        },
+        body: JSON.stringify(requestData),
+      })
+
+      if (response.ok) {
+        alert('Sale submitted successfully!')
+        setFormData(initialFormData)
+      } else {
+        console.error('Failed to submit sale:', response.statusText)
+        alert('Failed to submit sale. Please try again later.')
+      }
+    } catch (error) {
+      console.error('Error submitting sale:', error)
+      alert(
+        'Failed to submit sale. Please check your network connection and try again.'
+      )
     }
-    //api call to send data to backend
-    setFormData(initialFormData)
   }
 
   const saveAsDraft = () => {
@@ -300,18 +360,11 @@ const SalesScreen: React.FC = () => {
                       <MenuItem value="" disabled>
                         Select Item
                       </MenuItem>
-                      <MenuItem value="Item 1">
-                        {appConfig['feature.itemDetails'][0]}
-                      </MenuItem>
-                      <MenuItem value="Item 2">
-                        {appConfig['feature.itemDetails'][1]}
-                      </MenuItem>
-                      <MenuItem value="Item 3">
-                        {appConfig['feature.itemDetails'][2]}
-                      </MenuItem>
-                      <MenuItem value="Item 4">
-                        {appConfig['feature.itemDetails'][3]}
-                      </MenuItem>
+                      {items.map((item) => (
+                        <MenuItem key={item.id} value={item}>
+                          {item.name}
+                        </MenuItem>
+                      ))}
                     </TextField>
                   </TableCell>
                   <TableCell>
