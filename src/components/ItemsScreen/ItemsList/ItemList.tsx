@@ -47,7 +47,6 @@ export default function ItemList() {
   } | null>(null)
   useEffect(() => {
     getAllItems()
-    // itemsSend()
   }, [])
 
   const itemsFetch = async (itemId: number) => {
@@ -87,7 +86,6 @@ export default function ItemList() {
           headers: {
             'Content-Type': 'application/json',
             store: '1',
-            'User-Agent': 'insomnia/8.6.1',
           },
         }
       )
@@ -203,8 +201,8 @@ export default function ItemList() {
             value: parseFloat(data.data.quantity.value),
           },
         }
-        setlastEditedItem(editedItemData) // Set fetched item details
-        setEditModalOpen(true) // Open the edit modal
+        setlastEditedItem(editedItemData)
+        setEditModalOpen(true)
       } else {
         console.error('Failed to fetch item details:', response.statusText)
       }
@@ -245,9 +243,7 @@ export default function ItemList() {
         }
       )
       if (response.ok) {
-        // Update the UI or any state if needed
-        setEditModalOpen(false) // Close the edit modal
-      } else {
+        setEditModalOpen(false)
         console.error('Failed to update item:', response.statusText)
       }
     } catch (error) {
