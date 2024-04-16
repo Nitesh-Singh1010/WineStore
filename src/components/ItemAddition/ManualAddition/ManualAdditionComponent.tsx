@@ -119,6 +119,17 @@ const ManualAdditionComponent: React.FC = () => {
   }
 
   const handleAddInventory = async () => {
+    if (items.length == 0) {
+      alert('Please add items before submitting.')
+      return
+    }
+    const lastItem = items[items.length - 1]
+    if (lastItem.costPrice >= lastItem.sellingPrice) {
+      alert(
+        'The cost price of the last item must be less than the selling price.'
+      )
+      return
+    }
     const itemsToSend = items.map((item) => ({
       name: item.itemName,
       cost_price: item.costPrice,
@@ -127,7 +138,7 @@ const ManualAdditionComponent: React.FC = () => {
     }))
     try {
       for (const item of itemsToSend) {
-        console.log('Sending item:', item)
+        // console.log('Sending item:', item)
         await fetch('http://localhost:8000/api/item/create', {
           method: 'POST',
           headers: {
@@ -137,8 +148,11 @@ const ManualAdditionComponent: React.FC = () => {
           body: JSON.stringify(item),
         })
       }
+      setItems([defaultItem])
+      alert('Items have been created successfully.')
     } catch (error) {
-      console.error('Error in my API call:', error)
+      // console.error('Error in my API call:', error)
+      alert('Error occurred while creating items. Please try again later.')
     }
   }
 
