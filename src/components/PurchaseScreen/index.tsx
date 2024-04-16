@@ -72,6 +72,7 @@ const PurchaseScreen: React.FC = () => {
   const [itemNames, setItemNames] = useState<string[]>([])
   const [itemDetails, setItemDetails] = useState<any[]>([])
   const [formSubmitted, setFormSubmitted] = useState(false)
+  const [selectedItemNames, setSelectedItemNames] = useState<string[]>([])
   const [successAlert, setSuccessAlert] = useState(false)
   useEffect(() => {
     fetchItemNames()
@@ -123,7 +124,6 @@ const PurchaseScreen: React.FC = () => {
       itemRows: prevState.itemRows.filter((row) => row.id !== id),
     }))
   }
-
   const handleItemChange = (
     id: string,
     field: keyof ItemRow,
@@ -136,6 +136,14 @@ const PurchaseScreen: React.FC = () => {
           const updatedRow = { ...row, [field]: value }
 
           if (field === 'itemDetail') {
+            updatedRow.quantity = 0
+            const previousItemName = row.itemDetail
+            if (previousItemName) {
+              setSelectedItemNames((prevNames) =>
+                prevNames.filter((name) => name !== previousItemName)
+              )
+            }
+
             const selectedItem = itemDetails.find(
               (item: any) => item.name === value
             )
@@ -144,6 +152,7 @@ const PurchaseScreen: React.FC = () => {
               updatedRow.purchase_price = parseFloat(selectedItem.cost_price)
               updatedRow.sale_price = parseFloat(selectedItem.sale_price)
             }
+            setSelectedItemNames((prevNames) => [...prevNames, value])
           } else if (field === 'quantity') {
             updatedRow.total =
               parseFloat(updatedRow.purchase_price) * parseFloat(value)
@@ -393,7 +402,11 @@ const PurchaseScreen: React.FC = () => {
                     }
                   >
                     {itemNames.map((itemName, index) => (
-                      <MenuItem key={index} value={itemName}>
+                      <MenuItem
+                        key={index}
+                        value={itemName}
+                        disabled={selectedItemNames.includes(itemName)}
+                      >
                         {itemName}
                       </MenuItem>
                     ))}
