@@ -1,7 +1,6 @@
-import React from 'react'
+import React, { useEffect, useState, useContext } from 'react'
 import CommonTable, { Column } from '../common/CommonTable/CommonTable'
-import { Button } from '@mui/material'
-import lang from '../../lang-en.json'
+import { AppLangContext } from '@Contexts'
 import './index.scss'
 
 enum Status {
@@ -16,34 +15,38 @@ interface InventoryItem {
   quantity: string
   status: Status
 }
-function createData(
-  itemName: string,
-  costPrice: number,
-  sellingPrice: number,
-  quantityValue: number,
-  quantityUnit: string,
-  status: Status
-): InventoryItem {
-  return {
-    itemName,
-    costPrice,
-    sellingPrice,
-    quantity: `${quantityValue} ${quantityUnit}`,
-    status,
-  }
-}
 
 const Inventory: React.FC = () => {
-  const [rows, setRows] = React.useState<InventoryItem[]>([
-    createData('Red Label', 320, 390, 750, 'ml', Status.Active),
-    createData('Old Monk', 150, 180, 750, 'ml', Status.Active),
-    createData('Double Black Label', 279, 300, 180, 'ml', Status.Inactive),
-    createData('Sula', 540, 560, 500, 'ml', Status.Inactive),
-    createData('Magic Moments', 900, 950, 750, 'ml', Status.Active),
-    createData('Blenders Pride', 700, 950, 360, 'ml', Status.Active),
-    createData('Absolute Vodka', 900, 1100, 1, 'L', Status.Active),
-    createData('Bacardi Black', 660, 750, 1, 'L', Status.Inactive),
-  ])
+  const [rows, setRows] = useState<InventoryItem[]>([])
+  const { appLang } = useContext(AppLangContext)
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('http://localhost:8000/api/items', {
+          headers: {
+            store: '1',
+          },
+        })
+        if (!response.ok) {
+          throw new Error('Failed to fetch data')
+        }
+        const data = await response.json()
+        const items: InventoryItem[] = data.data.map((item: any) => ({
+          itemName: item.identifier,
+          costPrice: parseFloat(item.cost_price),
+          sellingPrice: parseFloat(item.sale_price),
+          quantity: item.quantity.identifier,
+          status: item.status as Status,
+        }))
+        setRows(items)
+      } catch (error) {
+        // console.error('Error fetching data:', error)
+        alert('Failed to fetch data from the server. Please try again later.')
+      }
+    }
+
+    fetchData()
+  }, [])
 
   const columns: Column[] = [
     { id: 'itemName', label: 'Item Name', sortable: true },
@@ -56,7 +59,7 @@ const Inventory: React.FC = () => {
   return (
     <>
       <div className="heading">
-        <h1>{lang['feature.headings'][3]}</h1>
+        <h1>{appLang['feature.inventoryScreen.heading']}</h1>
       </div>
       <CommonTable rows={rows} columns={columns} />
     </>
