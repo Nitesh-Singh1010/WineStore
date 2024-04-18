@@ -10,8 +10,8 @@ import {
   Paper,
   Chip,
 } from '@mui/material'
-import CustomTablePagination from '../CustomTablePagination/CustomTablePagination'
 import './CommonTable.scss'
+import TablePagination from '@mui/material/TablePagination'
 
 import React, { useState } from 'react'
 export interface Column {
@@ -179,17 +179,14 @@ const CommonTable: React.FC<CommonTableProps> = ({ rows, columns }) => {
               ))}
           </TableBody>
         </Table>
-
-        <CustomTablePagination
-          count={filteredRows.length}
+        <TablePagination
+          rowsPerPageOptions={[5, 10, 25]}
+          component="div"
+          count={rows.length}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
-          handleChangePage={handleChangePage}
-          jumpToPage={jumpToPage}
-          setJumpToPage={setJumpToPage}
-          handleJumpToPage={handleJumpToPage}
         />
       </TableContainer>
     </>
