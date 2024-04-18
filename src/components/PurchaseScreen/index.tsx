@@ -155,7 +155,7 @@ const PurchaseScreen: React.FC = () => {
             setSelectedItemNames((prevNames) => [...prevNames, value])
           } else if (field === 'quantity') {
             updatedRow.total =
-              parseFloat(updatedRow.purchase_price) * parseFloat(value)
+              parseFloat(updatedRow.sale_price) * parseFloat(value)
           }
           return updatedRow
         }
@@ -212,7 +212,6 @@ const PurchaseScreen: React.FC = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'User-Agent': 'insomnia/8.6.1',
           store: '1',
         },
         body: JSON.stringify({
@@ -267,10 +266,71 @@ const PurchaseScreen: React.FC = () => {
     setDrafts(updatedDrafts)
   }
 
-  const saveAsDraft = () => {
-    const draftWithVendor = { ...formData, vendorName: formData.vendorName }
-    setDrafts([...drafts, draftWithVendor])
-    setFormData(initialFormData)
+  // const saveAsDraft = () => {
+  //   const draftWithVendor = { ...formData, vendorName: formData.vendorName }
+  //   setDrafts([...drafts, draftWithVendor])
+  //   setFormData(initialFormData)
+  // }
+  const saveAsDraft = async () => {
+    const isFormEmpty = Object.values(formData).every(
+      (value) => value === initialFormData[value]
+    )
+
+    if (isFormEmpty) {
+      alert('The form is empty.')
+      return
+    }
+
+    const requiredFields = [
+      'vendorName',
+      'purchaseDate',
+      'paymentMode',
+      'paidAmount',
+    ]
+    const emptyFields = requiredFields.filter((field) => !formData[field])
+    if (emptyFields.length > 0) {
+      return
+    }
+
+    try {
+      const response = await fetch('http://localhost:8000/api/purchase', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          store: '1',
+        },
+        body: JSON.stringify({
+          vendor_name: formData.vendorName,
+          payment_method: formData.paymentMode,
+          discount: {
+            discount_type:
+              formData.discountType === 'percentage'
+                ? 'percentage'
+                : 'absolute',
+            amount: formData.discountValue,
+          },
+          paid_amount: formData.paidAmount,
+          total_amount: totalAmount - formData.discountValue,
+          items: formData.itemRows.map((row) => ({
+            item_id: getItemIdByName(row.itemDetail),
+            quantity: row.quantity,
+            total_amount: row.total,
+          })),
+          status: 'Draft',
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to make purchase')
+      }
+
+      setTimeout(() => {
+        setFormData(initialFormData)
+        setSuccessAlert(false)
+      }, 1500)
+    } catch (error) {
+      console.error('Error saving Draft:', error)
+    }
   }
 
   const renderFileNames = () => (
