@@ -8,9 +8,10 @@
   "feature.common.loader.uploadProgress.message": "{{percentCompleted}}% items fetched ...",
   "feature.common.loader.processing.message": "Processing ...",
 
-  "feature.go.button":"Go",
-  "feature.report.headings":["Transactions","Receivables","Deposits"],
-  
+  "feature.go.button": "Go",
+  "feature.transaction.heading": "Transactions",
+  "feature.deposits.heading": "Deposits",
+  "feature.receivables.heading": "Receivables",
 
   "feature.common.templates.loadingMessage.text": "Loading ...",
   "feature.common.templates.popups.errorHeading.text": "Error",
