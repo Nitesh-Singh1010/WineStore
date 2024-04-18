@@ -1,6 +1,7 @@
 import CommonTable, { Column } from '../common/CommonTable/CommonTable'
 import { AppLangContext } from '@Contexts'
 import React, { useEffect, useState, useContext } from 'react'
+
 enum PaymentMode {
   UPI = 'UPI',
   Cash = 'Cash',
@@ -21,6 +22,7 @@ interface Transaction {
 const Transactions: React.FC = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const { appLang } = useContext(AppLangContext)
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -33,28 +35,32 @@ const Transactions: React.FC = () => {
           throw new Error('Failed to fetch data')
         }
         const data = await response.json()
-        const formattedTransactions = data.data.map((transaction: any) => {
-          const discount =
-            transaction.discount.discount_type === 'absolute'
-              ? transaction.discount.amount
-              : (transaction.discount.amount / 100) * transaction.total_amount
-          const transactionDate = new Date(transaction.created_at.split('T')[0])
-          const paymentMode = transaction.payment_method as PaymentMode
-          return {
-            itemName: transaction.transaction_items[0].item.identifier,
-            quantity: transaction.transaction_items[0].quantity,
-            totalAmount: transaction.total_amount,
-            costPrice: parseFloat(
-              transaction.transaction_items[0].item.cost_price
-            ),
-            discount,
-            sellingPrice: parseFloat(
-              transaction.transaction_items[0].item.sale_price
-            ),
-            transactionDate,
-            paymentMode,
+        console.log(data)
+        const formattedTransactions: Transaction[] = data.data.flatMap(
+          (transaction: any) => {
+            const formattedTransactionItems = transaction.transaction_items.map(
+              (item: any) => {
+                const discount =
+                  transaction.discount.discount_type === 'absolute'
+                    ? transaction.discount.amount
+                    : (transaction.discount.amount / 100) * item.total_amount
+                return {
+                  itemName: item.item.identifier,
+                  quantity: item.quantity,
+                  totalAmount: item.total_amount,
+                  costPrice: parseFloat(item.item.cost_price),
+                  discount,
+                  sellingPrice: parseFloat(item.item.sale_price),
+                  transactionDate: new Date(
+                    transaction.created_at.split('T')[0]
+                  ),
+                  paymentMode: transaction.payment_method as PaymentMode,
+                }
+              }
+            )
+            return formattedTransactionItems
           }
-        })
+        )
         setTransactions(formattedTransactions)
       } catch (error) {
         console.error('Error fetching data:', error)
