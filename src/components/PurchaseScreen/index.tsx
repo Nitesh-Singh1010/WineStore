@@ -28,7 +28,7 @@ import FileUpload from './FileUpload'
 import './index.scss'
 import ResetConfirmationDialog from '@components/common/ResetConfirmationDialog/ResetConfirmationDialog'
 import DraftsDialog from '@components/PurchaseScreen/DraftsDialog'
-import { calculateTotalAmount } from '../../utils'
+
 import { AppLangContext } from '@Contexts'
 import { FormHelperText } from '@mui/material'
 interface ItemRow {
@@ -163,7 +163,9 @@ const PurchaseScreen: React.FC = () => {
       }),
     }))
   }
-
+  const calculateTotalAmount = (itemRows: ItemRow[], discountValue: number) => {
+    return itemRows.reduce((acc, curr) => acc + curr.total, 0) - discountValue
+  }
   const totalAmount = calculateTotalAmount(
     formData.itemRows,
     formData.discountValue
@@ -193,7 +195,6 @@ const PurchaseScreen: React.FC = () => {
     const selectedItem = itemDetails.find((item) => item.name === itemName)
     return selectedItem ? selectedItem.id : null
   }
-
   const handleSubmit = async () => {
     setFormSubmitted(true)
     const requiredFields = [
@@ -212,6 +213,7 @@ const PurchaseScreen: React.FC = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'User-Agent': 'insomnia/8.6.1',
           store: '1',
         },
         body: JSON.stringify({
@@ -266,11 +268,6 @@ const PurchaseScreen: React.FC = () => {
     setDrafts(updatedDrafts)
   }
 
-  // const saveAsDraft = () => {
-  //   const draftWithVendor = { ...formData, vendorName: formData.vendorName }
-  //   setDrafts([...drafts, draftWithVendor])
-  //   setFormData(initialFormData)
-  // }
   const saveAsDraft = async () => {
     const isFormEmpty = Object.values(formData).every(
       (value) => value === initialFormData[value]
@@ -615,7 +612,7 @@ const PurchaseScreen: React.FC = () => {
         <Grid item xs={12} md={10}>
           <Typography variant="h6" className="totalAmountText">
             {appLang['features.purchaseScreenMessages.totalAmountLabel']}{' '}
-            {(totalAmount - formData.discountValue).toFixed(2)}
+            {totalAmount.toFixed(2)}
           </Typography>
         </Grid>
 
