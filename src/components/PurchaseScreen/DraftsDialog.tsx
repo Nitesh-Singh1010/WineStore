@@ -50,6 +50,9 @@ const DraftsDialog: React.FC<DraftsDialogProps> = ({
       console.error('Error fetching drafts:', error)
     }
   }
+  const handleOpenDraft = (draftId: number) => {
+    window.open(`/purchase?draftId=${draftId}`, '_blank')
+  }
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
       <DialogTitle>Drafts</DialogTitle>
@@ -64,7 +67,10 @@ const DraftsDialog: React.FC<DraftsDialogProps> = ({
               />
               <ListItemSecondaryAction>
                 <Tooltip title="Open Draft">
-                  <IconButton aria-label="open-draft">
+                  <IconButton
+                    aria-label="open-draft"
+                    onClick={() => handleOpenDraft(draft.id)}
+                  >
                     <OpenInNewIcon />
                   </IconButton>
                 </Tooltip>
