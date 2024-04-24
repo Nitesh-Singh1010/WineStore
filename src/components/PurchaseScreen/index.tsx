@@ -115,7 +115,7 @@ const PurchaseScreen: React.FC = () => {
           quantity: item.quantity,
           purchase_price: parseFloat(item.item.cost_price),
           sale_price: parseFloat(item.item.sale_price),
-          total: item.quantity * parseFloat(item.item.sale_price),
+          total: item.quantity * parseFloat(item.item.cost_price),
         })),
         paymentMode: transactionData.payment_method,
         discountType: transactionData.discount?.discount_type || '',
@@ -196,7 +196,7 @@ const PurchaseScreen: React.FC = () => {
             setSelectedItemNames((prevNames) => [...prevNames, value])
           } else if (field === 'quantity') {
             updatedRow.total =
-              parseFloat(updatedRow.sale_price) * parseFloat(value)
+              parseFloat(updatedRow.purchase_price) * parseFloat(value)
           }
           return updatedRow
         }
@@ -262,43 +262,85 @@ const PurchaseScreen: React.FC = () => {
     if (emptyFields.length > 0) {
       return
     }
+    if (draftId) {
+      try {
+        const response = await fetch(
+          `http://localhost:8000/api/transaction/${draftId}`,
+          {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              store: '1',
+            },
+            body: JSON.stringify({
+              vendor_name: formData.vendorName,
+              payment_method: formData.paymentMode,
+              discount: {
+                discount_type:
+                  formData.discountType === 'percentage'
+                    ? 'percentage'
+                    : 'absolute',
+                amount: formData.discountValue,
+              },
+              paid_amount: formData.paidAmount,
+              total_amount: totalAmount - formData.discountValue,
+              items: formData.itemRows.map((row) => ({
+                item_id: getItemIdByName(row.itemDetail),
+                quantity: row.quantity,
+                total_amount: row.total,
+              })),
+              status: 'Active',
+            }),
+          }
+        )
 
-    try {
-      const response = await fetch('http://localhost:8000/api/purchase', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          store: '1',
-        },
-        body: JSON.stringify({
-          vendor_name: formData.vendorName,
-          payment_method: formData.paymentMode,
-          discount: {
-            discount_type:
-              formData.discountType === 'percentage'
-                ? 'percentage'
-                : 'absolute',
-            amount: formData.discountValue,
-          },
-          paid_amount: formData.paidAmount,
-          total_amount: totalAmount - formData.discountValue,
-          items: formData.itemRows.map((row) => ({
-            item_id: getItemIdByName(row.itemDetail),
-            quantity: row.quantity,
-            total_amount: row.total,
-          })),
-          status: 'Active',
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to make purchase')
-      } else {
-        alert('Purchased Succesfully')
-        setFormData(initialFormData)
+        if (!response.ok) {
+          throw new Error('Failed to make purchase')
+        } else {
+          alert('Draft Purchased Succesfully')
+          setFormData(initialFormData)
+        }
+      } catch (error) {
+        console.error('Error making purchase:', error)
       }
-    } catch (error) {
-      console.error('Error making purchase:', error)
+    } else {
+      try {
+        const response = await fetch('http://localhost:8000/api/purchase', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            store: '1',
+          },
+          body: JSON.stringify({
+            vendor_name: formData.vendorName,
+            payment_method: formData.paymentMode,
+            discount: {
+              discount_type:
+                formData.discountType === 'percentage'
+                  ? 'percentage'
+                  : 'absolute',
+              amount: formData.discountValue,
+            },
+            paid_amount: formData.paidAmount,
+            total_amount: totalAmount - formData.discountValue,
+            items: formData.itemRows.map((row) => ({
+              item_id: getItemIdByName(row.itemDetail),
+              quantity: row.quantity,
+              total_amount: row.total,
+            })),
+            status: 'Active',
+          }),
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to make purchase')
+        } else {
+          alert('Purchased Succesfully')
+          setFormData(initialFormData)
+        }
+      } catch (error) {
+        console.error('Error making purchase:', error)
+      }
     }
   }
 
@@ -335,58 +377,88 @@ const PurchaseScreen: React.FC = () => {
     if (emptyFields.length > 0) {
       return
     }
+    if (draftId) {
+      try {
+        const response = await fetch(
+          `http://localhost:8000/api/transaction/${draftId}`,
+          {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              store: '1',
+            },
+            body: JSON.stringify({
+              vendor_name: formData.vendorName,
+              payment_method: formData.paymentMode,
+              discount: {
+                discount_type:
+                  formData.discountType === 'percentage'
+                    ? 'percentage'
+                    : 'absolute',
+                amount: formData.discountValue,
+              },
+              paid_amount: formData.paidAmount,
+              total_amount: totalAmount - formData.discountValue,
+              items: formData.itemRows.map((row) => ({
+                item_id: getItemIdByName(row.itemDetail),
+                quantity: row.quantity,
+                total_amount: row.total,
+              })),
+              status: 'Draft',
+            }),
+          }
+        )
 
-    try {
-      const response = await fetch('http://localhost:8000/api/purchase', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          store: '1',
-        },
-        body: JSON.stringify({
-          vendor_name: formData.vendorName,
-          payment_method: formData.paymentMode,
-          discount: {
-            discount_type:
-              formData.discountType === 'percentage'
-                ? 'percentage'
-                : 'absolute',
-            amount: formData.discountValue,
-          },
-          paid_amount: formData.paidAmount,
-          total_amount: totalAmount - formData.discountValue,
-          items: formData.itemRows.map((row) => ({
-            item_id: getItemIdByName(row.itemDetail),
-            quantity: row.quantity,
-            total_amount: row.total,
-          })),
-          status: 'Draft',
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to make purchase')
+        if (!response.ok) {
+          throw new Error('Failed to make purchase')
+        } else {
+          alert('Draft Updated Succesfully')
+          // setFormData(initialFormData)
+        }
+      } catch (error) {
+        console.error('Error updating draft:', error)
       }
-      alert('Draft Saved Succesfully')
-      setFormData(initialFormData)
-    } catch (error) {
-      console.error('Error saving Draft:', error)
+    } else {
+      try {
+        const response = await fetch('http://localhost:8000/api/purchase', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            store: '1',
+          },
+          body: JSON.stringify({
+            vendor_name: formData.vendorName,
+            payment_method: formData.paymentMode,
+            discount: {
+              discount_type:
+                formData.discountType === 'percentage'
+                  ? 'percentage'
+                  : 'absolute',
+              amount: formData.discountValue,
+            },
+            paid_amount: formData.paidAmount,
+            total_amount: totalAmount - formData.discountValue,
+            items: formData.itemRows.map((row) => ({
+              item_id: getItemIdByName(row.itemDetail),
+              quantity: row.quantity,
+              total_amount: row.total,
+            })),
+            status: 'Draft',
+          }),
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to save as Draft')
+        }
+        alert('Draft Saved Succesfully')
+        setFormData(initialFormData)
+      } catch (error) {
+        console.error('Error saving Draft:', error)
+      }
     }
   }
   return (
     <Box sx={{ margin: 2 }}>
-      {successAlert && (
-        <div
-          style={{
-            backgroundColor: '#4caf50',
-            color: '#ffffff',
-            padding: '1rem',
-            marginBottom: '1rem',
-          }}
-        >
-          Purchase order successful!
-        </div>
-      )}
       <div className="heading">
         <Typography variant="h4" component="h1">
           Make a purchase
