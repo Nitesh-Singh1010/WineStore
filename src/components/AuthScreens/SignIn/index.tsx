@@ -43,13 +43,34 @@ const SignInScreen: React.FC<ISignInScreenProps> = ({}) => {
     setShowPassword(!showPassword)
   }
 
-  const handleFormSubmission = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleFormSubmission = async (
+    event: React.FormEvent<HTMLFormElement>
+  ) => {
     event.preventDefault()
+
+    const response = await fetch('/api/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formData),
+    })
+
+    if (response.ok) {
+      // Authentication successful, setting cookie
+      const expirationDate = new Date()
+      expirationDate.setTime(expirationDate.getTime() + 24 * 60 * 60 * 1000)
+      const expires = expirationDate.toUTCString()
+      document.cookie = `loggedIn=true; expires=${expires}; path=/; domain=dummydomain.com`
+      navigate('/Dashboard', { state: { username: formData.email } })
+    } else {
+      alert('Authentication Failed')
+    }
 
     // eslint-disable-next-line no-console
     console.log(formData)
     // TO DO : Move to context later
-    navigate('/Dashboard', { state: { username: formData.email } })
+    // navigate('/Dashboard', { state: { username: formData.email } })
   }
 
   return (
