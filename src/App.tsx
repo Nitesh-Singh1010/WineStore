@@ -43,7 +43,6 @@ const App: React.FC = () => {
           <Router>
             <div className="app-container">
               <Routes>
-              <Route path="/" element={<HomeScreen />} />
                 <Route path="/purchase" element={<PurchaseScreen />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
