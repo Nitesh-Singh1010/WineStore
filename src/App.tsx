@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 import './App.scss'
 
 import Spinner, { ISpinnerProps } from '@components/common/Spinner'
@@ -12,6 +12,8 @@ import baseLang from './lang-en.json'
 import PurchaseScreen from '@components/PurchaseScreen'
 import SalesScreen from '@components/SalesScreen'
 import Inventory from '@components/InventoryScreen'
+import ItemsScreen from '@components/ItemsScreen'
+import ItemList from '@components/ItemsScreen/ItemsList/ItemList'
 
 export interface INavItem {
   disabled?: boolean
@@ -55,6 +57,8 @@ const App: React.FC = () => {
                 
                 <Route path="/salesorder" element={<SalesScreen />} />
                 <Route path="/inventory" element={< Inventory/>} />
+                <Route path="/items" element={<ItemList />} />
+                <Route path="/items/create" element={<ItemsScreen />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </div>

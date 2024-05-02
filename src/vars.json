@@ -29,9 +29,12 @@
   "rowsPerPageOptions": [5, 10, 25],
 
   "feature.api.serverError.alert.autoCloseTimeout": 8000,
+  "feature.common.pagination.rowsPerPageOptions": [5, 10, 25],
+
+  "feature.quantityModal.units": ["L", "ml", "Kg", "g"],
 
   "feature.fileUpload.allowedFileSizeInMB.max": 2,
-  "feature.fileUpload.allowedFilesCount.max": 5,
+  "feature.fileUpload.allowedFilesCount.max": 15,
   "feature.fileUpload.allowedFileFormat.names": ".pdf, .txt",
   "feature.fileUpload.allowedTestFileFormat.names": "",
 
