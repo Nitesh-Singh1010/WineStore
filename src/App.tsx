@@ -2,14 +2,12 @@ import React, { useState } from 'react'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 import './App.scss'
 import Spinner, { ISpinnerProps } from '@components/common/Spinner'
-import HomeScreen from '@components/HomeScreen'
 import NotFound from '@components/NotFound'
 import { AppLangContext, AppStateContext } from '@Contexts'
 import baseVar from './vars.json'
 import baseLang from './lang-en.json'
 import ItemsScreen from '@components/ItemsScreen'
-import ItemList from '@components/ItemsList/ItemList'
-import { Inventory } from '@mui/icons-material'
+import ItemList from '@components/ItemsScreen/ItemsList/ItemList'
 
 export interface INavItem {
   disabled?: boolean
@@ -45,9 +43,8 @@ const App: React.FC = () => {
           <Router>
             <div className="app-container">
               <Routes>
-                <Route path="/" element={<HomeScreen/>} />
-                <Route path="/items" element={<ItemsScreen/>} />
-                <Route path="/items/create" element={<ItemList/>} />
+                <Route path="/items" element={<ItemList />} />
+                <Route path="/items/create" element={<ItemsScreen />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </div>
