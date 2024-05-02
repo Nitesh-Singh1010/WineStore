@@ -23,12 +23,31 @@
     "forgotPassword": "/forgot-password",
     "resetPassword": "/reset-password"
   },
-  "feature.auth.email.allowedDomainNames.list": [
-    "microsoft.com",
-    "gmail.com",
-    "wolterskluwer.com",
-    "yahoo.com"
-  ],
+  
+  "feature.mlService.api.timeout_error_codes": [502, 504, 499],
+
+  "feature.api.serverError.alert.autoCloseTimeout": 8000,
+
+  "feature.fileUpload.allowedFileSizeInMB.max": 2,
+  "feature.fileUpload.allowedFilesCount.max": 5,
+  "feature.fileUpload.allowedFileFormat.names": ".pdf, .txt",
+  "feature.fileUpload.allowedTestFileFormat.names": "",
+
+  "feature.paymentModes":["Cash","Card","UPI"],
+  
+  "feature.itemDetails":["Item 1", "Item 2", "Item 3", "Item 4"],
+
+  "feature.userHistory.listItem.selectionLimit.value": null,
+  "feature.userHistory.listItem.visibilityCount.value": 10,
+
+  "feature.summaryGenerationAPi.extraTimeoutInSecs.value": 2.5,
+
+  "feature.mailSystem.allowedDomainNames.list": [
+"microsoft.com",
+"gmail.com",
+"wolterskluwer.com",
+"yahoo.com"
+],
 
   "feature.common.navbar.routes.list": [
     {
@@ -50,5 +69,33 @@
   "feature.common.fileUpload.allowedFileSizeInMB.max": 2,
   "feature.common.fileUpload.allowedFilesCount.max": 5,
   "feature.common.fileUpload.allowedFileFormat.names": ".pdf, .txt",
-  "feature.common.fileUpload.allowedTestFileFormat.names": ""
+  "feature.common.fileUpload.allowedTestFileFormat.names": "",
+
+  "initialFormData": {
+    "customerName": "",
+    "salesOrderDate": "",
+    "itemRows": [],
+    "paymentMode": "",
+    "discountType": "",
+    "discountValue": 0,
+    "paidAmount": "",
+    "totalAmount": 0
+  },
+  "paymentModes": [
+    {"value": "Cash", "label": "Cash"},
+    {"value": "Card", "label": "Card"},
+    {"value": "UPI", "label": "UPI"}
+  ],
+  "discountTypes": [
+    {"value": "percentage", "label": "Percentage"},
+    {"value": "absolute", "label": "Absolute"}
+  ],
+  "labels": {
+    "salesOrderTitle": "Sales Order",
+    "customerName": "Customer's Name",
+    "salesOrderDate": "Sales Order Date",
+    "addItemButton": "Add Item",
+    "resetConfirmationTitle": "Confirmation",
+    "resetConfirmationContent": "Are you sure you want to reset the Order?"
+  }
 }
