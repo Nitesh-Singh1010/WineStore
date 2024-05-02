@@ -26,6 +26,8 @@
   
   "feature.mlService.api.timeout_error_codes": [502, 504, 499],
 
+  "rowsPerPageOptions": [5, 10, 25],
+
   "feature.api.serverError.alert.autoCloseTimeout": 8000,
 
   "feature.fileUpload.allowedFileSizeInMB.max": 2,
@@ -99,3 +101,4 @@
     "resetConfirmationContent": "Are you sure you want to reset the Order?"
   }
 }
+

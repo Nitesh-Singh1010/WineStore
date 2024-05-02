@@ -11,6 +11,7 @@ import baseVars from './vars.json'
 import baseLang from './lang-en.json'
 import PurchaseScreen from '@components/PurchaseScreen'
 import SalesScreen from '@components/SalesScreen'
+import Inventory from '@components/InventoryScreen'
 
 export interface INavItem {
   disabled?: boolean
@@ -53,6 +54,7 @@ const App: React.FC = () => {
                 />
                 
                 <Route path="/salesorder" element={<SalesScreen />} />
+                <Route path="/inventory" element={< Inventory/>} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </div>

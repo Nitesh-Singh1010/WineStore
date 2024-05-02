@@ -63,6 +63,9 @@
   "features.purchaseScreenMessages.upi": "UPI",
   "features.purchaseScreenMessages.draftsTitle": "Drafts",
   "features.purchaseScreenMessages.selectDraftMessage": "Select a draft to load or delete it.",
+  "feature.go.button":"Go",
+  "feature.inventoryScreen.heading":"Inventory",
+  
 
   "feature.common.templates.loadingMessage.text": "Loading ...",
   "feature.common.templates.popups.errorHeading.text": "Error",
