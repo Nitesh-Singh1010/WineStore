@@ -496,3 +496,7 @@ export const parseTextFromHTML = (str: string): string => {
 export const removeHTMLTags = (str: string): string => {
   return str.replace(/<\/?[^>]+(>|$)/gi, '')
 }
+
+
+
+ 

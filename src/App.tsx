@@ -9,6 +9,7 @@ import NotFound from '@components/NotFound'
 import { AppLangContext, AppStateContext } from '@Contexts'
 import baseVars from './vars.json'
 import baseLang from './lang-en.json'
+import PurchaseScreen from '@components/PurchaseScreen'
 
 export interface INavItem {
   disabled?: boolean
@@ -44,6 +45,7 @@ const App: React.FC = () => {
           <Router>
             <div className="app-container">
               <Routes>
+                <Route path="/purchase" element={<PurchaseScreen />} />
                 <Route
                   path={baseVars['feature.auth.routes'].signIn}
                   element={<SignInScreen />}
