@@ -9,14 +9,15 @@ import DialogActions from '@mui/material/DialogActions'
 import Button from '@mui/material/Button'
 import TextField from '@mui/material/TextField'
 import TablePagination from '@mui/material/TablePagination'
-import React, { useState, useMemo, useContext } from 'react'
+import React, { useState, useMemo, useContext, useEffect } from 'react'
 import { AppLangContext } from '@Contexts'
 interface ItemListData {
   id: number
   itemName: string
   costPrice: number
   sellingPrice: number
-  quantity: number
+  quantity: { size: string; value: number; identifier: number }
+  quantityType: number
 }
 
 type SortDirection = 'asc' | 'desc'
@@ -32,13 +33,101 @@ function sortComparator<T>(a: T, b: T, direction: SortDirection) {
 }
 
 export default function ItemList() {
+  const [rows, setRows] = useState<ItemListData[]>([])
+  const [editModalOpen, setEditModalOpen] = useState<boolean>(false)
+  const [lastEditedItem, setlastEditedItem] = useState<ItemListData | null>(
+    null
+  )
+  const [searchQuery, setSearchQuery] = useState<string>('')
+  const [page, setPage] = useState(0)
+  const [showAlert, setShowAlert] = useState(false)
+  const [rowsPerPage, setRowsPerPage] = useState(5)
   const { appLang } = useContext(AppLangContext)
   const [sortConfig, setSortConfig] = useState<{
     key: keyof ItemListData
     direction: SortDirection
   } | null>(null)
+  useEffect(() => {
+    getAllItems()
+  }, [])
 
-  const [searchQuery, setSearchQuery] = useState<string>('')
+  const updateItem = async () => {
+    try {
+      if (!lastEditedItem) return
+      if (lastEditedItem.sellingPrice < lastEditedItem.costPrice) {
+        alert('Selling price cannot be less than cost price')
+        return
+      }
+      const data = {
+        name: lastEditedItem.itemName,
+        cost_price: lastEditedItem.costPrice,
+        sale_price: lastEditedItem.sellingPrice,
+        quantity_type_id: lastEditedItem.quantityType,
+      }
+
+      const response = await fetch(
+        `http://localhost:8000/api/item/update/${lastEditedItem.id}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            store: '1',
+          },
+          body: JSON.stringify(data),
+        }
+      )
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const responseData = await response.json()
+
+      setRows((prevRows) =>
+        prevRows.map((row) =>
+          row.id === lastEditedItem.id ? { ...row, ...lastEditedItem } : row
+        )
+      )
+      alert('Item Updated Succesfully')
+      setEditModalOpen(false)
+    } catch (error) {
+      console.error('Error:', error)
+    }
+  }
+  const getAllItems = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/api/items', {
+        method: 'GET',
+        headers: {
+          'User-Agent': 'insomnia/8.6.1',
+          store: '1',
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const responseData = await response.json()
+
+      const apiRows = responseData.data.map((item: any) => ({
+        id: item.id,
+        itemName: item.identifier,
+        costPrice: parseFloat(item.cost_price),
+        sellingPrice: parseFloat(item.sale_price),
+        quantity: {
+          size: item.quantity.size,
+          value: parseInt(item.quantity.value),
+          identifier: item.quantity.identifier,
+        },
+        quantityType: item.quantity_type,
+      }))
+
+      setRows(apiRows)
+    } catch (error) {
+      console.error('Error:', error)
+    }
+  }
 
   const requestSort = (key: keyof ItemListData) => {
     let direction: SortDirection = 'asc'
@@ -52,66 +141,39 @@ export default function ItemList() {
     setSortConfig({ key, direction })
   }
 
-  const [rows, setRows] = useState<ItemListData[]>([
-    {
-      id: 1,
-      itemName: 'Item 1',
-      costPrice: 280,
-      sellingPrice: 360,
-      quantity: 27,
-    },
-    {
-      id: 2,
-      itemName: 'Item 2',
-      costPrice: 450,
-      sellingPrice: 560,
-      quantity: 31,
-    },
-    {
-      id: 3,
-      itemName: 'Item 3',
-      costPrice: 170,
-      sellingPrice: 210,
-      quantity: 19,
-    },
-    {
-      id: 4,
-      itemName: 'Item 4',
-      costPrice: 450,
-      sellingPrice: 490,
-      quantity: 47,
-    },
-    {
-      id: 5,
-      itemName: 'Item 5',
-      costPrice: 220,
-      sellingPrice: 255,
-      quantity: 56,
-    },
-    {
-      id: 6,
-      itemName: 'Item 6',
-      costPrice: 130,
-      sellingPrice: 140,
-      quantity: 10,
-    },
-    {
-      id: 7,
-      itemName: 'Item 7',
-      costPrice: 790,
-      sellingPrice: 850,
-      quantity: 18,
-    },
-  ])
-
-  const [editModalOpen, setEditModalOpen] = useState<boolean>(false)
-  const [lastEditedItem, setlastEditedItem] = useState<ItemListData | null>(
-    null
-  )
-
-  const openEditModal = (item: ItemListData) => {
-    setlastEditedItem(item)
-    setEditModalOpen(true)
+  const openEditModal = async (item: ItemListData) => {
+    try {
+      const response = await fetch(
+        `http://localhost:8000/api/item/get/${item.id}`,
+        {
+          method: 'GET',
+          headers: {
+            store: '1',
+          },
+        }
+      )
+      if (response.ok) {
+        const data = await response.json()
+        const editedItemData: ItemListData = {
+          id: data.data.id,
+          itemName: data.data.name,
+          costPrice: parseFloat(data.data.cost_price),
+          sellingPrice: parseFloat(data.data.sale_price),
+          quantity: {
+            size: data.data.quantity.size,
+            value: parseFloat(data.data.quantity.value),
+            identifier: data.data.quantity.identifier,
+          },
+          quantityType: data.data.quantity_type,
+        }
+        setlastEditedItem(editedItemData)
+        setEditModalOpen(true)
+      } else {
+        console.error('Failed to fetch item details:', response.statusText)
+      }
+    } catch (error) {
+      console.error('Error fetching item details:', error)
+    }
   }
 
   const closeEditModal = () => {
@@ -119,34 +181,20 @@ export default function ItemList() {
     setEditModalOpen(false)
   }
 
-  const deleteRow = (index: number) => {
-    setRows((prevRows) => prevRows.filter((_, rowIndex) => rowIndex !== index))
-  }
+  const deleteRow = async (index: number) => {
+    const itemIdToDelete = rows[index].id
+    try {
+      await updateItemStatus(itemIdToDelete, 'Deleted')
 
-  const saveChanges = () => {
-    if (
-      lastEditedItem &&
-      lastEditedItem.sellingPrice >= lastEditedItem.costPrice
-    ) {
       setRows((prevRows) =>
-        prevRows.map((row) =>
-          row.id === lastEditedItem.id ? { ...lastEditedItem } : row
-        )
+        prevRows.filter((_, rowIndex) => rowIndex !== index)
       )
-      closeEditModal()
-    } else {
-      // Handling validation error (selling price less than cost price)
-      alert(appLang['feature.sellingPrice.costPrice.rule'])
+    } catch (error) {
+      console.error('Error:', error)
     }
   }
 
   const columns = [
-    {
-      id: 'id',
-      label: 'ID',
-      component: (data: any) => <span>{data}</span>,
-      requestSort: () => requestSort('id'),
-    },
     {
       id: 'itemName',
       label: 'Item Name',
@@ -168,7 +216,7 @@ export default function ItemList() {
     {
       id: 'quantity',
       label: 'Quantity',
-      component: (data: any) => <span>{data}</span>,
+      component: (data: any) => <span>{data.identifier}</span>,
       requestSort: () => requestSort('quantity'),
     },
     {
@@ -202,9 +250,6 @@ export default function ItemList() {
     )
   }, [sortedRows, searchQuery])
 
-  const [page, setPage] = useState(0)
-  const [rowsPerPage, setRowsPerPage] = useState(5)
-
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage)
   }
@@ -230,7 +275,6 @@ export default function ItemList() {
         rows={filteredAndSortedRows
           .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
           .map((row) => [
-            row.id,
             row.itemName,
             row.costPrice,
             row.sellingPrice,
@@ -277,6 +321,7 @@ export default function ItemList() {
                 }
                 fullWidth
                 margin="normal"
+                disabled
               />
               <TextField
                 label={appLang['feature.item.screens.table.headers'][1]}
@@ -289,6 +334,7 @@ export default function ItemList() {
                 fullWidth
                 margin="normal"
               />
+
               <TextField
                 label={appLang['feature.item.screens.table.headers'][2]}
                 value={lastEditedItem.sellingPrice}
@@ -301,23 +347,48 @@ export default function ItemList() {
                 }
                 fullWidth
                 margin="normal"
+                onBlur={(e) => {
+                  if (Number(e.target.value) < lastEditedItem.costPrice) {
+                    setShowAlert(true)
+                  } else {
+                    setShowAlert(false)
+                  }
+                }}
+                onFocus={() => {
+                  setShowAlert(false)
+                }}
               />
-              <TextField
-                label={appLang['feature.item.screens.table.headers'][3]}
-                value={lastEditedItem.quantity}
+              {showAlert && (
+                <div style={{ color: 'red' }}>
+                  Selling price cannot be less than cost price
+                </div>
+              )}
+
+              {/* <TextField
+                label={appLang['feature.item.screens.table.headers'][2]}
+                value={lastEditedItem.sellingPrice}
                 onChange={(e) =>
                   setlastEditedItem((prev) =>
-                    prev ? { ...prev, quantity: Number(e.target.value) } : null
+                    prev
+                      ? { ...prev, sellingPrice: Number(e.target.value) }
+                      : null
                   )
                 }
                 fullWidth
                 margin="normal"
+              /> */}
+              <TextField
+                label={appLang['feature.item.screens.table.headers'][3]}
+                value={`${lastEditedItem.quantity.value}-${lastEditedItem.quantity.size}`}
+                fullWidth
+                margin="normal"
+                disabled
               />
             </>
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={saveChanges} color="primary">
+          <Button onClick={updateItem} color="primary">
             {appLang['feature.common.templates.popups.general.save.button']}
           </Button>
           <Button onClick={closeEditModal} color="primary">

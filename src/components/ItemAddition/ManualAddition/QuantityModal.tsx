@@ -9,6 +9,7 @@ import {
 } from '@mui/material'
 import './QuantityModal.scss'
 import { AppLangContext, AppStateContext, IAppStateContext } from '@Contexts'
+
 interface AddQuantityModalProps {
   open: boolean
   handleClose: () => void
@@ -32,6 +33,7 @@ const QuantityModal: React.FC<AddQuantityModalProps> = ({
 }) => {
   const { appLang } = useContext(AppLangContext)
   const { appConfig } = useContext<IAppStateContext>(AppStateContext)
+
   return (
     <Modal open={open} onClose={handleClose}>
       <div className="modal-container">

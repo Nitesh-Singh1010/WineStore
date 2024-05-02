@@ -1,25 +1,25 @@
-import React from 'react';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
+import React from 'react'
+import Table from '@mui/material/Table'
+import TableBody from '@mui/material/TableBody'
+import TableCell from '@mui/material/TableCell'
+import TableContainer from '@mui/material/TableContainer'
+import TableHead from '@mui/material/TableHead'
+import TableRow from '@mui/material/TableRow'
 
 interface CommonTableProps {
   columns: Array<{
-    id: string;
-    label: string;
-    component: (data: any, rowIndex?: number) => JSX.Element;
-    requestSort?: () => void;
-  }>;
-  rows: (string | number | null)[][];
-  title: string;
+    id: string
+    label: string
+    component: (data: any, rowIndex?: number) => JSX.Element
+    requestSort?: () => void
+  }>
+  rows: (string | number | null)[][]
+  title: string
   sortConfig?: {
-    key: string;
-    direction: 'asc' | 'desc';
-  };
-  requestSort?: (key: string) => void;
+    key: string
+    direction: 'asc' | 'desc'
+  }
+  requestSort?: (key: string) => void
 }
 
 const CommonTable: React.FC<CommonTableProps> = ({
@@ -30,9 +30,9 @@ const CommonTable: React.FC<CommonTableProps> = ({
   requestSort,
 }) => {
   const getSortDirection = (columnId: string) => {
-    if (!sortConfig || sortConfig.key !== columnId) return;
-    return sortConfig.direction === 'asc' ? ' 🔼' : ' 🔽';
-  };
+    if (!sortConfig || sortConfig.key !== columnId) return
+    return sortConfig.direction === 'asc' ? ' 🔼' : ' 🔽'
+  }
 
   return (
     <TableContainer>
@@ -60,7 +60,7 @@ const CommonTable: React.FC<CommonTableProps> = ({
         </TableBody>
       </Table>
     </TableContainer>
-  );
-};
+  )
+}
 
-export default CommonTable;
+export default CommonTable
