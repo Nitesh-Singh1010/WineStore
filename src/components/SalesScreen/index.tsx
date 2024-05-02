@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useContext, useState, useEffect } from 'react'
 import {
   Box,
   Button,
@@ -13,21 +13,19 @@ import {
   TableHead,
   TableRow,
   TextField,
+  FormHelperText,
   Typography,
   ListItemIcon,
-  List,
-  ListItem,
-  ListItemText,
   IconButton,
 } from '@mui/material'
 import DeleteIcon from '@mui/icons-material/Delete'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
-import lang from '../../lang-en.json'
-import vars from '../../vars.json'
+import { AppStateContext, IAppStateContext, AppLangContext } from '@Contexts'
 import './index.scss'
 import ResetConfirmationDialog from '@components/common/ResetConfirmationDialog/ResetConfirmationDialog'
 import DraftsDialog from './DraftsDialog'
+import { v4 as uuidv4 } from 'uuid'
 
 interface ItemRow {
   id: number
@@ -44,7 +42,7 @@ export interface FormData {
   paymentMode: string
   discountType: string
   discountValue: number
-  paidAmount: string
+  paidAmount: number
   totalAmount: number
 }
 
@@ -52,59 +50,125 @@ const SalesScreen: React.FC = () => {
   const initialFormData: FormData = {
     customerName: '',
     salesOrderDate: new Date().toISOString().split('T')[0],
-    itemRows: [],
+    itemRows: [
+      {
+        id: uuidv4(),
+        itemDetail: '',
+        quantity: 0,
+        rate: 0,
+        total: 0,
+      },
+    ],
     paymentMode: '',
     discountType: '',
     discountValue: 0,
-    paidAmount: '',
+    paidAmount: 0,
     totalAmount: 0,
   }
 
   const [formData, setFormData] = useState<FormData>(initialFormData)
-  const [files, setFiles] = useState<File[]>([])
   const [openResetConfirmation, setOpenResetConfirmation] = useState(false)
-  const [drafts, setDrafts] = useState<FormData[]>([])
+
   const [openDraftsModal, setOpenDraftsModal] = useState(false)
-  const [idCounter, setIdCounter] = useState<number>(0)
 
+  const { appLang } = useContext(AppLangContext)
+  const { appConfig } = useContext<IAppStateContext>(AppStateContext)
+
+  const [itemNames, setItemNames] = useState<string[]>([])
+  const [itemDetails, setItemDetails] = useState<any[]>([])
+  const [formSubmitted, setFormSubmitted] = useState(false)
+  const [selectedItemNames, setSelectedItemNames] = useState<string[]>([])
+  const urlParams = new URLSearchParams(window.location.search)
+  const draftId = urlParams.get('draftId')
   useEffect(() => {
-    // Load customer name from local storage
-    // const storedCustomerName = localStorage.getItem('customerName')
-    // if (storedCustomerName) {
-    //   setFormData((prevFormData) => ({
-    //     ...prevFormData,
-    //     customerName: storedCustomerName,
-    //   }))
-    // }
-
-    // Adding one default item row when component mounts
-    addItemRow()
+    fetchItemNames()
   }, [])
-  const addItemRow = () => {
-    const newItemRow: ItemRow = {
-      id: idCounter + 1,
-      itemDetail: '',
-      quantity: 0,
-      rate: 0,
-      total: 0,
+  useEffect(() => {
+    if (draftId) {
+      fetchTransactionData(draftId)
     }
+  }, [draftId])
 
+  const fetchTransactionData = async (id: number) => {
+    try {
+      const response = await fetch(
+        `http://localhost:8000/api/transaction/${id}`,
+        {
+          headers: {
+            store: '1',
+          },
+        }
+      )
+      if (!response.ok) {
+        throw new Error('Failed to fetch transaction data')
+      }
+      const responseData = await response.json()
+      const transactionData = responseData.data
+
+      setFormData({
+        customerName: transactionData.vendor_name,
+        salesOrderDate: transactionData.created_at.split('T')[0],
+        itemRows: transactionData.transaction_items.map((item: any) => ({
+          id: item.id,
+          itemDetail: item.item.identifier,
+          quantity: item.quantity,
+          rate: parseFloat(item.item.sale_price),
+          total: item.quantity * parseFloat(item.item.sale_price),
+        })),
+        paymentMode: transactionData.payment_method,
+        discountType: transactionData.discount?.discount_type || '',
+        discountValue: transactionData.discount?.amount || 0,
+        paidAmount: transactionData.paid_amount,
+        totalAmount: transactionData.total_amount,
+      })
+    } catch (error) {
+      console.error('Error fetching transaction data:', error)
+    }
+  }
+  const fetchItemNames = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/api/items', {
+        headers: {
+          store: '1',
+        },
+      })
+      const responseData = await response.json()
+      setItemDetails(responseData.data)
+      const names = responseData.data.map((item: any) => item.identifier)
+      setItemNames(names)
+    } catch (error) {
+      console.error('Error fetching item names:', error)
+    }
+  }
+  const addItemRow = () => {
     setFormData((prevState) => ({
       ...prevState,
-      itemRows: [...prevState.itemRows, newItemRow],
+      itemRows: [
+        ...prevState.itemRows,
+        {
+          id: uuidv4(),
+          itemDetail: '',
+          quantity: 0,
+          rate: 0,
+          total: 0,
+        },
+      ],
     }))
-
-    setIdCounter((prevCounter) => prevCounter + 1)
   }
 
-  const deleteItemRow = (id: number) => {
+  const deleteItemRow = (id: string) => {
     setFormData((prevState) => ({
       ...prevState,
       itemRows: prevState.itemRows.filter((row) => row.id !== id),
     }))
-
-    setIdCounter((prevCounter) => prevCounter - 1) // Decrementing the counter
   }
+  const getItemIdByName = (itemName) => {
+    const selectedItem = itemDetails.find(
+      (item) => item.identifier === itemName
+    )
+    return selectedItem ? selectedItem.id : null
+  }
+
   const handleResetConfirmationClose = () => {
     setOpenResetConfirmation(false)
   }
@@ -113,18 +177,8 @@ const SalesScreen: React.FC = () => {
     setOpenResetConfirmation(false)
     setFormData(initialFormData)
   }
-  const handleDraftsModalClose = () => {
-    setOpenDraftsModal(false)
-  }
-
-  const deleteDraft = (index: number) => {
-    const updatedDrafts = [...drafts]
-    updatedDrafts.splice(index, 1)
-    setDrafts(updatedDrafts)
-  }
-
   const handleItemChange = (
-    id: number,
+    id: string,
     field: keyof ItemRow,
     value: string
   ) => {
@@ -132,11 +186,27 @@ const SalesScreen: React.FC = () => {
       ...prevState,
       itemRows: prevState.itemRows.map((row) => {
         if (row.id === id) {
-          const updatedRow = { ...row, [field]: value }
+          const updatedRow = { ...row, [field]: value, total: 0 }
 
-          if (['quantity', 'rate'].includes(field)) {
-            const total = updatedRow.quantity * updatedRow.rate
-            return { ...updatedRow, total }
+          if (field === 'itemDetail') {
+            updatedRow.quantity = 0
+            const previousItemName = row.itemDetail
+            if (previousItemName) {
+              setSelectedItemNames((prevNames) =>
+                prevNames.filter((name) => name !== previousItemName)
+              )
+            }
+
+            const selectedItem = itemDetails.find(
+              (item: any) => item.identifier === value
+            )
+
+            if (selectedItem) {
+              updatedRow.rate = parseFloat(selectedItem.sale_price)
+            }
+            setSelectedItemNames((prevNames) => [...prevNames, value])
+          } else if (field === 'quantity') {
+            updatedRow.total = parseFloat(updatedRow.rate) * parseFloat(value)
           }
           return updatedRow
         }
@@ -145,9 +215,23 @@ const SalesScreen: React.FC = () => {
     }))
   }
 
-  const totalAmount = formData.itemRows.reduce(
-    (acc, curr) => acc + curr.total,
-    0
+  const calculateTotalAmount = (itemRows: ItemRow[], discountValue: number) => {
+    let discount = 0
+    if (formData.discountType === 'percentage') {
+      discount =
+        itemRows.reduce((acc, curr) => acc + curr.total, 0) *
+        (discountValue / 100)
+    } else {
+      discount = discountValue
+    }
+    return Math.max(
+      0,
+      itemRows.reduce((acc, curr) => acc + curr.total, 0) - discount
+    )
+  }
+  const totalAmount = calculateTotalAmount(
+    formData.itemRows,
+    formData.discountValue
   )
 
   const handleDiscountTypeChange = (
@@ -170,25 +254,200 @@ const SalesScreen: React.FC = () => {
       discountValue,
     }))
   }
-
-  const handleSubmit = () => {
-    let discountedTotal = totalAmount
-    if (formData.discountType === 'percentage') {
-      discountedTotal -= (totalAmount * formData.discountValue) / 100
-    } else if (formData.discountType === 'absolute') {
-      discountedTotal -= formData.discountValue
+  const handleSubmit = async () => {
+    setFormSubmitted(true)
+    const requiredFields = [
+      'customerName',
+      'salesOrderDate',
+      'paymentMode',
+      'paidAmount',
+    ]
+    const emptyFields = requiredFields.filter((field) => !formData[field])
+    if (emptyFields.length > 0) {
+      return
     }
-    // console.log('Total after discount:', discountedTotal)
-    // console.log(formData)
-    // Logic to send formData to the backend
+    if (draftId) {
+      try {
+        const response = await fetch(
+          `http://localhost:8000/api/transaction/${draftId}`,
+          {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              store: '1',
+            },
+            body: JSON.stringify({
+              vendor_name: formData.customerName,
+              payment_method: formData.paymentMode,
+              discount: {
+                discount_type:
+                  formData.discountType === 'percentage'
+                    ? 'percentage'
+                    : 'absolute',
+                amount: formData.discountValue,
+              },
+              paid_amount: formData.paidAmount,
+              total_amount: totalAmount - formData.discountValue,
+              items: formData.itemRows.map((row) => ({
+                item_id: getItemIdByName(row.itemDetail),
+                quantity: row.quantity,
+                total_amount: row.total,
+              })),
+              status: 'Active',
+            }),
+          }
+        )
+
+        if (!response.ok) {
+          throw new Error('Failed to make purchase')
+        } else {
+          alert('Draft sold Succesfully')
+          setFormData(initialFormData)
+        }
+      } catch (error) {
+        console.error('Error making purchase:', error)
+      }
+    } else {
+      try {
+        const response = await fetch('http://localhost:8000/api/sale', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            store: '1',
+          },
+          body: JSON.stringify({
+            vendor_name: formData.customerName,
+            payment_method: formData.paymentMode,
+            discount: {
+              discount_type: formData.discountType,
+              amount: formData.discountValue,
+            },
+            paid_amount: formData.paidAmount,
+            total_amount: totalAmount - formData.discountValue,
+            items: formData.itemRows.map((row) => ({
+              item_id: getItemIdByName(row.itemDetail),
+              quantity: row.quantity,
+              total_amount: row.total,
+            })),
+            status: 'Active',
+          }),
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to make purchase')
+        } else {
+          alert('Purchased Succesfully')
+          setFormData(initialFormData)
+        }
+      } catch (error) {
+        console.error('Error making purchase:', error)
+      }
+    }
   }
 
-  const saveAsDraft = () => {
-    // Storing customer name in local storage
-    // localStorage.setItem('customerName', formData.customerName)
+  const handleViewDrafts = () => {
+    setOpenDraftsModal(true)
+  }
 
-    setDrafts([...drafts, formData])
-    setFormData(initialFormData) // Resetting the form data to initial state
+  const saveAsDraft = async () => {
+    const isFormEmpty = Object.values(formData).every(
+      (value) => value === initialFormData[value]
+    )
+
+    if (isFormEmpty) {
+      alert('The form is empty.')
+      return
+    }
+
+    const requiredFields = [
+      'customerName',
+      'salesOrderDate',
+      'paymentMode',
+      'paidAmount',
+    ]
+    const emptyFields = requiredFields.filter((field) => !formData[field])
+    if (emptyFields.length > 0) {
+      return
+    }
+    if (draftId) {
+      try {
+        const response = await fetch(
+          `http://localhost:8000/api/transaction/${draftId}`,
+          {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              store: '1',
+            },
+            body: JSON.stringify({
+              vendor_name: formData.customerName,
+              payment_method: formData.paymentMode,
+              discount: {
+                discount_type:
+                  formData.discountType === 'percentage'
+                    ? 'percentage'
+                    : 'absolute',
+                amount: formData.discountValue,
+              },
+              paid_amount: formData.paidAmount,
+              total_amount: totalAmount - formData.discountValue,
+              items: formData.itemRows.map((row) => ({
+                item_id: getItemIdByName(row.itemDetail),
+                quantity: row.quantity,
+                total_amount: row.total,
+              })),
+              status: 'Draft',
+            }),
+          }
+        )
+
+        if (!response.ok) {
+          throw new Error('Failed to make purchase')
+        } else {
+          alert('Draft Updated Succesfully')
+          // setFormData(initialFormData)
+        }
+      } catch (error) {
+        console.error('Error updating draft:', error)
+      }
+    } else {
+      try {
+        const response = await fetch('http://localhost:8000/api/sale', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            store: '1',
+          },
+          body: JSON.stringify({
+            vendor_name: formData.customerName,
+            payment_method: formData.paymentMode,
+            discount: {
+              discount_type:
+                formData.discountType === 'percentage'
+                  ? 'percentage'
+                  : 'absolute',
+              amount: formData.discountValue,
+            },
+            paid_amount: formData.paidAmount,
+            total_amount: totalAmount - formData.discountValue,
+            items: formData.itemRows.map((row) => ({
+              item_id: getItemIdByName(row.itemDetail),
+              quantity: row.quantity,
+              total_amount: row.total,
+            })),
+            status: 'Draft',
+          }),
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to save as Draft')
+        }
+        alert('Draft Saved Succesfully')
+        setFormData(initialFormData)
+      } catch (error) {
+        console.error('Error saving Draft:', error)
+      }
+    }
   }
   const handlePrintBill = () => {
     alert('Printing Bill...')
@@ -200,32 +459,37 @@ const SalesScreen: React.FC = () => {
           <ListItemIcon>
             <ShoppingCartIcon />
           </ListItemIcon>
-          {lang['feature.salesScreen.hardTexts'].salesOrderTitle}
+          {appLang['feature.salesScreen.salesOrderTitle']}
         </Typography>
-        <IconButton onClick={() => setOpenDraftsModal(true)}>
+        <IconButton onClick={handleViewDrafts} className="viewDraftsButton">
           <ArrowDropDownIcon />
-          <Typography>
-            {lang['feature.salesScreen.hardTexts'].viewDrafts}
-          </Typography>
+          <Typography>{appLang['feature.salesScreen.viewDrafts']}</Typography>
         </IconButton>
       </div>
       <Grid container spacing={3} mt={2}>
         <Grid item xs={12} md={6}>
           <TextField
             fullWidth
-            label="Customer's Name"
+            label={appLang['feature.salesScreen.customerNameLabel']}
             value={formData.customerName}
             onChange={(e) =>
               setFormData({ ...formData, customerName: e.target.value })
             }
             margin="normal"
+            required
+            error={formSubmitted && !formData.customerName}
           />
+          {formSubmitted && !formData.customerName && (
+            <FormHelperText style={{ color: 'red' }}>
+              Vendor Name is required.
+            </FormHelperText>
+          )}
         </Grid>
         <Grid item xs={12} md={6}>
           <TextField
             fullWidth
             type="date"
-            label="Sales Order Date"
+            label={appLang['feature.salesScreen.salesOrderDateLabel']}
             InputLabelProps={{ shrink: true }}
             value={formData.salesOrderDate}
             onChange={(e) =>
@@ -236,52 +500,52 @@ const SalesScreen: React.FC = () => {
           />
         </Grid>
       </Grid>
-      {formData.itemRows.length > 0 && (
+      <Grid container spacing={3}>
         <Grid item xs={12}>
+          {' '}
           <Table>
             <TableHead>
               <TableRow>
                 <TableCell width="50%">
-                  {lang['feature.salesScreen.hardTexts'].itemDetailColumnName}
+                  {appLang['feature.salesScreen.itemDetailColumnName']}
                 </TableCell>
                 <TableCell>
-                  {lang['feature.salesScreen.hardTexts'].quantityColumnName}
+                  {appLang['feature.salesScreen.quantityColumnName']}
                 </TableCell>
                 <TableCell>
-                  {lang['feature.salesScreen.hardTexts'].rateColumnName}
+                  {appLang['feature.salesScreen.rateColumnName']}
                 </TableCell>
                 <TableCell>
-                  {lang['feature.salesScreen.hardTexts'].totalColumnName}
+                  {appLang['feature.salesScreen.totalColumnName']}
                 </TableCell>
                 <TableCell>
-                  {lang['feature.salesScreen.hardTexts'].actionColumnName}
+                  {appLang['feature.salesScreen.actionColumnName']}
                 </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {formData.itemRows.map((row, index) => (
-                <TableRow key={`${row.id}-${index}`}>
+              {formData.itemRows.map((row) => (
+                <TableRow key={row.id}>
                   <TableCell>
                     <TextField
                       fullWidth
                       select
+                      required
+                      label="Select Items"
                       value={row.itemDetail}
                       onChange={(e) =>
                         handleItemChange(row.id, 'itemDetail', e.target.value)
                       }
                     >
-                      <MenuItem value="Item 1">
-                        {vars['feature.itemDetails'][0]}
-                      </MenuItem>
-                      <MenuItem value="Item 2">
-                        {vars['feature.itemDetails'][1]}
-                      </MenuItem>
-                      <MenuItem value="Item 3">
-                        {vars['feature.itemDetails'][2]}
-                      </MenuItem>
-                      <MenuItem value="Item 4">
-                        {vars['feature.itemDetails'][3]}
-                      </MenuItem>
+                      {itemNames.map((itemName, index) => (
+                        <MenuItem
+                          key={index}
+                          value={itemName}
+                          disabled={selectedItemNames.includes(itemName)}
+                        >
+                          {itemName}
+                        </MenuItem>
+                      ))}
                     </TextField>
                   </TableCell>
                   <TableCell>
@@ -289,10 +553,18 @@ const SalesScreen: React.FC = () => {
                       fullWidth
                       type="number"
                       value={row.quantity}
+                      required
                       onChange={(e) =>
                         handleItemChange(row.id, 'quantity', e.target.value)
                       }
+                      InputProps={{ inputProps: { min: 1 } }}
+                      error={formSubmitted && row.quantity == 0}
                     />
+                    {formSubmitted && row.quantity == 0 && (
+                      <FormHelperText style={{ color: 'red' }}>
+                        Quantity is Required.
+                      </FormHelperText>
+                    )}
                   </TableCell>
                   <TableCell>
                     <TextField
@@ -302,6 +574,9 @@ const SalesScreen: React.FC = () => {
                       onChange={(e) =>
                         handleItemChange(row.id, 'rate', e.target.value)
                       }
+                      InputProps={{
+                        readOnly: true,
+                      }}
                     />
                   </TableCell>
                   <TableCell>{row.total.toFixed(2)}</TableCell>
@@ -314,36 +589,40 @@ const SalesScreen: React.FC = () => {
               ))}
             </TableBody>
           </Table>
+          <Box className="addItemContainer">
+            <Button
+              onClick={addItemRow}
+              variant="contained"
+              className="addItemButton"
+            >
+              Add Item
+            </Button>
+          </Box>
         </Grid>
-      )}
-      <Grid item xs={12}>
-        <Box display="flex" justifyContent="center">
-          <Button onClick={addItemRow} variant="contained" sx={{ my: 3 }}>
-            Add Item
-          </Button>
-        </Box>
       </Grid>
       <Grid container spacing={3}>
         <Grid item xs={12} md={6}>
           <FormControl fullWidth margin="normal">
             <InputLabel id="payment-mode-label">
-              {lang['feature.salesScreen.hardTexts'].paymentModeLabel}
+              {appLang['feature.salesScreen.paymentModeLabel']}
             </InputLabel>
             <Select
               labelId="payment-mode-label"
               value={formData.paymentMode}
-              label={lang['feature.salesScreen.hardTexts'].paymentModeLabel}
+              label={appLang['feature.salesScreen.paymentModeLabel']}
               onChange={(e) =>
                 setFormData({ ...formData, paymentMode: e.target.value })
               }
             >
               <MenuItem value="Cash">
-                {vars['feature.paymentModes'][0]}
+                {appConfig['feature.paymentModes'][0]}
               </MenuItem>
               <MenuItem value="Card">
-                {vars['feature.paymentModes'][1]}
+                {appConfig['feature.paymentModes'][1]}
               </MenuItem>
-              <MenuItem value="UPI">{vars['feature.paymentModes'][2]}</MenuItem>
+              <MenuItem value="UPI">
+                {appConfig['feature.paymentModes'][2]}
+              </MenuItem>
             </Select>
           </FormControl>
         </Grid>
@@ -353,7 +632,7 @@ const SalesScreen: React.FC = () => {
             <Grid item xs={6}>
               <FormControl fullWidth margin="normal">
                 <InputLabel>
-                  {lang['feature.salesScreen.hardTexts'].discountTypeLabel}
+                  {appLang['feature.salesScreen.discountTypeLabel']}
                 </InputLabel>
                 <Select
                   value={formData.discountType}
@@ -361,15 +640,12 @@ const SalesScreen: React.FC = () => {
                 >
                   <MenuItem value="percentage">
                     {
-                      lang['feature.salesScreen.hardTexts'].discountValueLabel
+                      appLang['feature.salesScreen.discountValueLabel']
                         .percentage
                     }
                   </MenuItem>
                   <MenuItem value="absolute">
-                    {
-                      lang['feature.salesScreen.hardTexts'].discountValueLabel
-                        .absolute
-                    }
+                    {appLang['feature.salesScreen.discountValueLabel'].absolute}
                   </MenuItem>
                 </Select>
               </FormControl>
@@ -382,6 +658,7 @@ const SalesScreen: React.FC = () => {
                 value={formData.discountValue}
                 onChange={handleDiscountValueChange}
                 margin="normal"
+                InputProps={{ inputProps: { min: 0 } }}
               />
             </Grid>
           </Grid>
@@ -389,18 +666,25 @@ const SalesScreen: React.FC = () => {
         <Grid item xs={12} md={6}>
           <TextField
             fullWidth
-            label={lang['feature.salesScreen.hardTexts'].paidAmountLabel}
+            label={appLang['feature.salesScreen.paidAmountLabel']}
             value={formData.paidAmount}
             onChange={(e) =>
               setFormData({ ...formData, paidAmount: e.target.value })
             }
             margin="normal"
+            required
+            error={formSubmitted && !formData.paidAmount}
           />
+          {formSubmitted && !formData.paidAmount && (
+            <FormHelperText style={{ color: 'red' }}>
+              Paid Amount is required.
+            </FormHelperText>
+          )}
         </Grid>
         <Grid item xs={12} md={6}>
           <Typography variant="h6" my={5} className="totalAmount">
-            {lang['feature.salesScreen.hardTexts'].totalAmountLabel}{' '}
-            {(totalAmount - formData.discountValue).toFixed(2)}
+            {appLang['feature.salesScreen.totalAmountLabel']}{' '}
+            {totalAmount.toFixed(2)}
           </Typography>
         </Grid>
         <Grid item xs={12}>
@@ -411,7 +695,7 @@ const SalesScreen: React.FC = () => {
               color="primary"
               sx={{ mt: 2, mr: 2 }}
             >
-              {lang['feature.salesScreen.hardTexts'].printBillButton}
+              {appLang['feature.salesScreen.printBillButton']}
             </Button>
             <Button
               variant="contained"
@@ -419,14 +703,14 @@ const SalesScreen: React.FC = () => {
               sx={{ mt: 2, mr: 2 }}
               onClick={() => setOpenResetConfirmation(true)}
             >
-              {lang['feature.salesScreen.hardTexts'].resetButton}
+              {appLang['feature.salesScreen.resetButton']}
             </Button>
             <Button
               onClick={saveAsDraft}
               variant="contained"
               sx={{ mt: 2, mr: 2 }}
             >
-              {lang['feature.salesScreen.hardTexts'].saveDraftButton}
+              {appLang['feature.salesScreen.saveDraftButton']}
             </Button>
             <Button
               onClick={handleSubmit}
@@ -434,7 +718,7 @@ const SalesScreen: React.FC = () => {
               color="primary"
               sx={{ mt: 2 }}
             >
-              {lang['feature.salesScreen.hardTexts'].confirmButton}
+              {appLang['feature.salesScreen.confirmButton']}
             </Button>
           </Box>
         </Grid>
@@ -446,12 +730,10 @@ const SalesScreen: React.FC = () => {
       />
       <DraftsDialog
         open={openDraftsModal}
-        onClose={handleDraftsModalClose}
-        drafts={drafts}
-        deleteDraft={deleteDraft}
+        onClose={() => setOpenDraftsModal(false)}
+        apiEndpoint="http://localhost:8000/api/draft-transactions?txn_type=Sale"
       />
     </Box>
   )
 }
-
 export default SalesScreen

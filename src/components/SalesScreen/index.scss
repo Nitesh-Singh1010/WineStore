@@ -19,3 +19,9 @@
     margin-top: 1rem;
     margin-right: 1rem;
 }
+.addItemContainer {
+    display: grid;
+    grid-template-columns: 1fr;
+    justify-items: center;
+    margin-top: 2rem;
+  }

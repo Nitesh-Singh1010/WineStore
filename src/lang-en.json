@@ -1,40 +1,38 @@
 {
   "feature.app.serverException.message.text": "Oops, Something went wrong!<br />Please try again later",
   "feature.app.uiException.message.text": "Oops, Something went wrong!<br />Please refresh manually or try again later",
-  "feature.app.resetConfirmation.text" :"Are you sure you want to reset?",
+  "feature.app.resetConfirmation.text": "Are you sure you want to reset?",
 
   "feature.loginPage.alert.incorrectInfo.message": "Incorrect username or password!!",
   "feature.loginPage.alert.compulsoryInfo.message": "Both <b>username</b> & <b>password</b> are mandatory!!",
-  "feature.salesScreen.hardTexts":{
-    "salesOrderTitle": "Sales Order",
-    "viewDrafts": "View Drafts",
-    "customerNameLabel": "Customer's Name",
-    "salesOrderDateLabel": "Sales Order Date",
-    "addItemButton": "Add Item",
-    "paymentModeLabel": "Payment Mode",
-    "discountTypeLabel": "Discount Type",
-    "discountValueLabel": {
-      "percentage": "Percentage (%)",
-      "absolute": "Absolute (Rs.)"
-    },
-    "paidAmountLabel": "Paid Amount",
-    "totalAmountLabel": "Total Amount : Rs.",
-    "printBillButton": "Print Bill",
-    "resetButton": "Reset",
-    "saveDraftButton": "Save as Draft",
-    "confirmButton": "Confirm",
-    "resetConfirmationTitle": "Confirmation",
-    "resetConfirmationMessage": "Are you sure you want to reset the Order?",
-    "yesButton": "Yes",
-    "cancelButton": "Cancel",
-    "draftsTitle": "Drafts",
-    "selectDraftMessage": "Select a draft to load or delete it.",
-    "itemDetailColumnName":"Item Detail",
-    "quantityColumnName":"Quantity",
-    "rateColumnName":"Rate",
-    "totalColumnName":"Total",
-    "actionColumnName":"Action"
+
+  "feature.salesScreen.salesOrderTitle": "Sales Order",
+  "feature.salesScreen.viewDrafts": "View Drafts",
+  "feature.salesScreen.customerNameLabel": "Customer's Name",
+  "feature.salesScreen.salesOrderDateLabel": "Sales Order Date",
+  "feature.salesScreen.addItemButton": "Add Item",
+  "feature.salesScreen.paymentModeLabel": "Payment Mode",
+  "feature.salesScreen.discountTypeLabel": "Discount Type",
+  "feature.salesScreen.discountValueLabel": {
+    "percentage": "Percentage (%)",
+    "absolute": "Absolute (Rs.)"
   },
+  "feature.salesScreen.paidAmountLabel": "Paid Amount",
+  "feature.salesScreen.totalAmountLabel": "Total Amount : Rs.",
+  "feature.salesScreen.printBillButton": "Print Bill",
+  "feature.salesScreen.resetButton": "Reset",
+  "feature.salesScreen.saveDraftButton": "Save as Draft",
+  "feature.salesScreen.confirmButton": "Confirm",
+  "feature.salesScreen.resetConfirmationTitle": "Confirmation",
+  "feature.salesScreen.resetConfirmationMessage": "Are you sure you want to reset the Order?",
+  "feature.salesScreen.draftsTitle": "Drafts",
+  "feature.salesScreen.selectDraftMessage": "Select a draft to load or delete it.",
+  "feature.salesScreen.itemDetailColumnName": "Item Detail",
+  "feature.salesScreen.quantityColumnName": "Quantity",
+  "feature.salesScreen.rateColumnName": "Rate",
+  "feature.salesScreen.totalColumnName": "Total",
+  "feature.salesScreen.actionColumnName": "Action",
+
   "feature.common.loader.uploadProgress.message": "{{percentCompleted}}% items fetched ...",
   "feature.common.loader.processing.message": "Processing ...",
 
@@ -44,7 +42,7 @@
   "feature.common.templates.popups.general.close.button": "Close",
   "feature.common.templates.popups.general.cancel.button": "Cancel",
   "feature.common.templates.popups.general.delete.button": "Delete",
+  "feature.common.templates.popups.general.yes.button": "Yes",
   "feature.common.templates.popups.general.apply.button": "Apply",
   "feature.common.templates.popups.general.saveAndClose.button": "Save & Close"
-  
 }
