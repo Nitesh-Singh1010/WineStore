@@ -463,7 +463,5 @@ export const removeHTMLTags = (str: string): string => {
 }
 
 
-// Funtion to calculate Total Amount 
-export const calculateTotalAmount = (itemRows: ItemRow[], discountValue: number) => {
-  return itemRows.reduce((acc, curr) => acc + curr.total, 0) - discountValue;
-}
+
+ 

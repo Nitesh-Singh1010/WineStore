@@ -3,12 +3,10 @@ import {
   Button,
   FormControl,
   Grid,
-  Paper,
   IconButton,
   InputLabel,
   MenuItem,
   Select,
-  ListItemSecondaryAction,
   Table,
   TableBody,
   TableCell,
@@ -16,29 +14,26 @@ import {
   TableRow,
   TextField,
   Typography,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
+  FormHelperText,
 } from '@mui/material'
 import DeleteIcon from '@mui/icons-material/Delete'
-import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import { v4 as uuidv4 } from 'uuid'
-import React, { useState, useCallback } from 'react'
-import { SelectChangeEvent } from '@mui/material/Select'
+
 import FileUpload from './FileUpload'
 import './index.scss'
 import ResetConfirmationDialog from '@components/common/ResetConfirmationDialog/ResetConfirmationDialog'
 import DraftsDialog from '@components/PurchaseScreen/DraftsDialog'
-import { calculateTotalAmount } from '../../utils'
-import langEN from '../../lang-en.json'
+
+import { AppLangContext } from '@Contexts'
+
+import React, { useState, useContext, useEffect } from 'react'
 interface ItemRow {
   id: string
   itemDetail: string
   quantity: number
-  costPrice: number
-  sellingPrice: number
+  purchase_price: number
+  sale_price: number
   total: number
 }
 
@@ -49,7 +44,7 @@ export interface FormData {
   paymentMode: string
   discountType: string
   discountValue: number
-  paidAmount: string
+  paidAmount: number
   totalAmount: number
 }
 
@@ -57,27 +52,96 @@ const PurchaseScreen: React.FC = () => {
   const initialFormData: FormData = {
     vendorName: '',
     purchaseDate: new Date().toISOString().split('T')[0],
-    itemRows: [],
+    itemRows: [
+      // adding an initial row
+      {
+        id: uuidv4(),
+        itemDetail: '',
+        quantity: 0,
+        purchase_price: 0,
+        sale_price: 0,
+        total: 0,
+      },
+    ],
     paymentMode: '',
     discountType: '',
     discountValue: 0,
-    paidAmount: '',
+    paidAmount: 0,
     totalAmount: 0,
   }
+  const { appLang } = useContext(AppLangContext)
 
-  const [showAddItemButton, setShowAddItemButton] = useState(false)
   const [formData, setFormData] = useState<FormData>(initialFormData)
   const [files, setFiles] = useState<File[]>([])
   const [openResetConfirmation, setOpenResetConfirmation] = useState(false)
   const [openDraftsModal, setOpenDraftsModal] = useState(false)
-  const [drafts, setDrafts] = useState<FormData[]>([]) // State to store drafts
+  const [itemNames, setItemNames] = useState<string[]>([])
+  const [itemDetails, setItemDetails] = useState<any[]>([])
+  const [formSubmitted, setFormSubmitted] = useState(false)
+  const [selectedItemNames, setSelectedItemNames] = useState<string[]>([])
+  const urlParams = new URLSearchParams(window.location.search)
+  const draftId = urlParams.get('draftId')
+  useEffect(() => {
+    fetchItemNames()
+  }, [])
+  useEffect(() => {
+    if (draftId) {
+      fetchTransactionData(draftId)
+    }
+  }, [draftId])
 
-  const onDrop = useCallback(
-    (acceptedFiles: File[]) => {
-      setFiles([...files, ...acceptedFiles])
-    },
-    [files]
-  )
+  const fetchTransactionData = async (id: number) => {
+    try {
+      const response = await fetch(
+        `http://localhost:8000/api/transaction/${id}`,
+        {
+          headers: {
+            store: '1',
+          },
+        }
+      )
+      if (!response.ok) {
+        throw new Error('Failed to fetch transaction data')
+      }
+      const responseData = await response.json()
+      const transactionData = responseData.data
+
+      setFormData({
+        vendorName: transactionData.vendor_name,
+        purchaseDate: transactionData.created_at.split('T')[0],
+        itemRows: transactionData.transaction_items.map((item: any) => ({
+          id: item.id,
+          itemDetail: item.item.identifier,
+          quantity: item.quantity,
+          purchase_price: parseFloat(item.item.cost_price),
+          sale_price: parseFloat(item.item.sale_price),
+          total: item.quantity * parseFloat(item.item.cost_price),
+        })),
+        paymentMode: transactionData.payment_method,
+        discountType: transactionData.discount?.discount_type || '',
+        discountValue: transactionData.discount?.amount || 0,
+        paidAmount: transactionData.paid_amount,
+        totalAmount: transactionData.total_amount,
+      })
+    } catch (error) {
+      console.error('Error fetching transaction data:', error)
+    }
+  }
+  const fetchItemNames = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/api/items', {
+        headers: {
+          store: '1',
+        },
+      })
+      const responseData = await response.json()
+      setItemDetails(responseData.data)
+      const names = responseData.data.map((item: any) => item.identifier)
+      setItemNames(names)
+    } catch (error) {
+      console.error('Error fetching item names:', error)
+    }
+  }
   const addItemRow = () => {
     setFormData((prevState) => ({
       ...prevState,
@@ -87,13 +151,12 @@ const PurchaseScreen: React.FC = () => {
           id: uuidv4(),
           itemDetail: '',
           quantity: 0,
-          costPrice: 0,
-          sellingPrice: 0,
+          purchase_price: 0,
+          sale_price: 0,
           total: 0,
         },
       ],
     }))
-    setShowAddItemButton(true)
   }
 
   const deleteItemRow = (id: string) => {
@@ -102,7 +165,6 @@ const PurchaseScreen: React.FC = () => {
       itemRows: prevState.itemRows.filter((row) => row.id !== id),
     }))
   }
-
   const handleItemChange = (
     id: string,
     field: keyof ItemRow,
@@ -112,11 +174,29 @@ const PurchaseScreen: React.FC = () => {
       ...prevState,
       itemRows: prevState.itemRows.map((row) => {
         if (row.id === id) {
-          const updatedRow = { ...row, [field]: value }
+          const updatedRow = { ...row, [field]: value, total: 0 }
 
-          if (['quantity', 'costPrice', 'sellingPrice'].includes(field)) {
-            const total = updatedRow.quantity * updatedRow.costPrice
-            return { ...updatedRow, total }
+          if (field === 'itemDetail') {
+            updatedRow.quantity = 0
+            const previousItemName = row.itemDetail
+            if (previousItemName) {
+              setSelectedItemNames((prevNames) =>
+                prevNames.filter((name) => name !== previousItemName)
+              )
+            }
+
+            const selectedItem = itemDetails.find(
+              (item: any) => item.identifier === value
+            )
+
+            if (selectedItem) {
+              updatedRow.purchase_price = parseFloat(selectedItem.cost_price)
+              updatedRow.sale_price = parseFloat(selectedItem.sale_price)
+            }
+            setSelectedItemNames((prevNames) => [...prevNames, value])
+          } else if (field === 'quantity') {
+            updatedRow.total =
+              parseFloat(updatedRow.purchase_price) * parseFloat(value)
           }
           return updatedRow
         }
@@ -125,6 +205,20 @@ const PurchaseScreen: React.FC = () => {
     }))
   }
 
+  const calculateTotalAmount = (itemRows: ItemRow[], discountValue: number) => {
+    let discount = 0
+    if (formData.discountType === 'percentage') {
+      discount =
+        itemRows.reduce((acc, curr) => acc + curr.total, 0) *
+        (discountValue / 100)
+    } else {
+      discount = discountValue
+    }
+    return Math.max(
+      0,
+      itemRows.reduce((acc, curr) => acc + curr.total, 0) - discount
+    )
+  }
   const totalAmount = calculateTotalAmount(
     formData.itemRows,
     formData.discountValue
@@ -150,17 +244,104 @@ const PurchaseScreen: React.FC = () => {
       discountValue,
     }))
   }
-
-  const handleSubmit = () => {
-    let discountedTotal = totalAmount
-    if (formData.discountType === 'percentage') {
-      discountedTotal -= (totalAmount * formData.discountValue) / 100
-    } else if (formData.discountType === 'absolute') {
-      discountedTotal -= formData.discountValue
+  const getItemIdByName = (itemName) => {
+    const selectedItem = itemDetails.find(
+      (item) => item.identifier === itemName
+    )
+    return selectedItem ? selectedItem.id : null
+  }
+  const handleSubmit = async () => {
+    setFormSubmitted(true)
+    const requiredFields = [
+      'vendorName',
+      'purchaseDate',
+      'paymentMode',
+      'paidAmount',
+    ]
+    const emptyFields = requiredFields.filter((field) => !formData[field])
+    if (emptyFields.length > 0) {
+      return
     }
-    console.log('Total after discount:', discountedTotal)
-    console.log(formData)
-    // Logic to send formData to the backend
+    if (draftId) {
+      try {
+        const response = await fetch(
+          `http://localhost:8000/api/transaction/${draftId}`,
+          {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              store: '1',
+            },
+            body: JSON.stringify({
+              vendor_name: formData.vendorName,
+              payment_method: formData.paymentMode,
+              discount: {
+                discount_type:
+                  formData.discountType === 'percentage'
+                    ? 'percentage'
+                    : 'absolute',
+                amount: formData.discountValue,
+              },
+              paid_amount: formData.paidAmount,
+              total_amount: totalAmount - formData.discountValue,
+              items: formData.itemRows.map((row) => ({
+                item_id: getItemIdByName(row.itemDetail),
+                quantity: row.quantity,
+                total_amount: row.total,
+              })),
+              status: 'Active',
+            }),
+          }
+        )
+
+        if (!response.ok) {
+          throw new Error('Failed to make purchase')
+        } else {
+          alert('Draft Purchased Succesfully')
+          setFormData(initialFormData)
+        }
+      } catch (error) {
+        console.error('Error making purchase:', error)
+      }
+    } else {
+      try {
+        const response = await fetch('http://localhost:8000/api/purchase', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            store: '1',
+          },
+          body: JSON.stringify({
+            vendor_name: formData.vendorName,
+            payment_method: formData.paymentMode,
+            discount: {
+              discount_type:
+                formData.discountType === 'percentage'
+                  ? 'percentage'
+                  : 'absolute',
+              amount: formData.discountValue,
+            },
+            paid_amount: formData.paidAmount,
+            total_amount: totalAmount - formData.discountValue,
+            items: formData.itemRows.map((row) => ({
+              item_id: getItemIdByName(row.itemDetail),
+              quantity: row.quantity,
+              total_amount: row.total,
+            })),
+            status: 'Active',
+          }),
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to make purchase')
+        } else {
+          alert('Purchased Succesfully')
+          setFormData(initialFormData)
+        }
+      } catch (error) {
+        console.error('Error making purchase:', error)
+      }
+    }
   }
 
   const handleResetConfirmationClose = () => {
@@ -171,47 +352,122 @@ const PurchaseScreen: React.FC = () => {
     setOpenResetConfirmation(false)
     setFormData(initialFormData)
   }
-  const handleDraftsModalClose = () => {
-    setOpenDraftsModal(false)
+
+  const handleViewDrafts = () => {
+    setOpenDraftsModal(true)
   }
 
-  const deleteDraft = (index: number) => {
-    const updatedDrafts = [...drafts]
-    updatedDrafts.splice(index, 1)
-    setDrafts(updatedDrafts)
-  }
+  const saveAsDraft = async () => {
+    const isFormEmpty = Object.values(formData).every(
+      (value) => value === initialFormData[value]
+    )
 
-  const saveAsDraft = () => {
-    const draftWithVendor = { ...formData, vendorName: formData.vendorName }
-    setDrafts([...drafts, draftWithVendor]) // Saving current form data as a draft
-    // Sending formData to backend for saving draft by writing backend logic
-    setFormData(initialFormData) // Resetting the form data to initial state
-  }
+    if (isFormEmpty) {
+      alert('The form is empty.')
+      return
+    }
 
-  const renderFileNames = () => (
-    <List>
-      {files.map((file, index) => (
-        <ListItem key={index}>
-          <ListItemIcon>
-            <InsertDriveFileIcon />
-          </ListItemIcon>
-          <ListItemText
-            primary={file.name}
-            secondary={`Size: ${file.size} bytes`}
-          />
-        </ListItem>
-      ))}
-    </List>
-  )
+    const requiredFields = [
+      'vendorName',
+      'purchaseDate',
+      'paymentMode',
+      'paidAmount',
+    ]
+    const emptyFields = requiredFields.filter((field) => !formData[field])
+    if (emptyFields.length > 0) {
+      return
+    }
+    if (draftId) {
+      try {
+        const response = await fetch(
+          `http://localhost:8000/api/transaction/${draftId}`,
+          {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              store: '1',
+            },
+            body: JSON.stringify({
+              vendor_name: formData.vendorName,
+              payment_method: formData.paymentMode,
+              discount: {
+                discount_type:
+                  formData.discountType === 'percentage'
+                    ? 'percentage'
+                    : 'absolute',
+                amount: formData.discountValue,
+              },
+              paid_amount: formData.paidAmount,
+              total_amount: totalAmount - formData.discountValue,
+              items: formData.itemRows.map((row) => ({
+                item_id: getItemIdByName(row.itemDetail),
+                quantity: row.quantity,
+                total_amount: row.total,
+              })),
+              status: 'Draft',
+            }),
+          }
+        )
+
+        if (!response.ok) {
+          throw new Error('Failed to make purchase')
+        } else {
+          alert('Draft Updated Succesfully')
+          // setFormData(initialFormData)
+        }
+      } catch (error) {
+        console.error('Error updating draft:', error)
+      }
+    } else {
+      try {
+        const response = await fetch('http://localhost:8000/api/purchase', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            store: '1',
+          },
+          body: JSON.stringify({
+            vendor_name: formData.vendorName,
+            payment_method: formData.paymentMode,
+            discount: {
+              discount_type:
+                formData.discountType === 'percentage'
+                  ? 'percentage'
+                  : 'absolute',
+              amount: formData.discountValue,
+            },
+            paid_amount: formData.paidAmount,
+            total_amount: totalAmount - formData.discountValue,
+            items: formData.itemRows.map((row) => ({
+              item_id: getItemIdByName(row.itemDetail),
+              quantity: row.quantity,
+              total_amount: row.total,
+            })),
+            status: 'Draft',
+          }),
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to save as Draft')
+        }
+        alert('Draft Saved Succesfully')
+        setFormData(initialFormData)
+      } catch (error) {
+        console.error('Error saving Draft:', error)
+      }
+    }
+  }
   return (
     <Box sx={{ margin: 2 }}>
       <div className="heading">
         <Typography variant="h4" component="h1">
           Make a purchase
         </Typography>
-        <IconButton onClick={() => setOpenDraftsModal(true)}>
+        <IconButton onClick={handleViewDrafts} className="viewDraftsButton">
           <ArrowDropDownIcon />
-          <Typography>View Drafts</Typography>
+          <Typography>
+            {appLang['features.purchaseScreenMessages.draftDialogTitle']}
+          </Typography>
         </IconButton>
       </div>
 
@@ -225,13 +481,21 @@ const PurchaseScreen: React.FC = () => {
               setFormData({ ...formData, vendorName: e.target.value })
             }
             margin="normal"
+            required
+            error={formSubmitted && !formData.vendorName}
           />
+          {formSubmitted && !formData.vendorName && (
+            <FormHelperText style={{ color: 'red' }}>
+              Vendor Name is required.
+            </FormHelperText>
+          )}
         </Grid>
         <Grid item xs={12} md={6}>
           <TextField
             fullWidth
             type="date"
             label="Purchase Date"
+            required
             InputLabelProps={{ shrink: true }}
             value={formData.purchaseDate}
             onChange={(e) =>
@@ -241,106 +505,117 @@ const PurchaseScreen: React.FC = () => {
             inputProps={{ max: new Date().toISOString().split('T')[0] }}
           />
         </Grid>
-        {!showAddItemButton && (
-          <Grid item xs={12}>
-            <Box className="addItemContainer">
-              <Button
-                onClick={addItemRow}
-                variant="contained"
-                className="addItemButton"
-              >
-                Add Item
-              </Button>
-            </Box>
-          </Grid>
-        )}
       </Grid>
 
-      {formData.itemRows.length > 0 && (
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell width="50%">
-                {langEN['features.common.purchaseMessages'].itemDetail}
-              </TableCell>
-              <TableCell>
-                {langEN['features.common.purchaseMessages'].quantity}
-              </TableCell>
-              <TableCell>
-                {langEN['features.common.purchaseMessages'].purchasePrice}
-              </TableCell>
-              <TableCell>
-                {langEN['features.common.purchaseMessages'].sellingPrice}
-              </TableCell>
-              <TableCell>
-                {langEN['features.common.purchaseMessages'].total}
-              </TableCell>
-              <TableCell>
-                {langEN['features.common.purchaseMessages'].action}
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {formData.itemRows.map((row) => (
-              <TableRow key={row.id}>
-                <TableCell>
-                  <TextField
-                    fullWidth
-                    select
-                    value={row.itemDetail}
-                    onChange={(e) =>
-                      handleItemChange(row.id, 'itemDetail', e.target.value)
-                    }
-                  >
-                    <MenuItem value="Item 1">Item 1</MenuItem>
-                    <MenuItem value="Item 2">Item 2</MenuItem>
-                    <MenuItem value="Item 3">Item 3</MenuItem>
-                    <MenuItem value="Item 4">Item 4</MenuItem>
-                  </TextField>
+      <Grid container spacing={3}>
+        <Grid item xs={12}>
+          {' '}
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell width="50%">
+                  {appLang['features.purchaseScreenMessages.itemDetail']}
                 </TableCell>
                 <TableCell>
-                  <TextField
-                    fullWidth
-                    type="number"
-                    value={row.quantity}
-                    onChange={(e) =>
-                      handleItemChange(row.id, 'quantity', e.target.value)
-                    }
-                  />
+                  {appLang['features.purchaseScreenMessages.quantity']}
                 </TableCell>
                 <TableCell>
-                  <TextField
-                    fullWidth
-                    type="number"
-                    value={row.costPrice}
-                    onChange={(e) =>
-                      handleItemChange(row.id, 'costPrice', e.target.value)
-                    }
-                  />
+                  {appLang['features.purchaseScreenMessages.purchasePrice']}
                 </TableCell>
                 <TableCell>
-                  <TextField
-                    fullWidth
-                    type="number"
-                    value={row.sellingPrice}
-                    onChange={(e) =>
-                      handleItemChange(row.id, 'sellingPrice', e.target.value)
-                    }
-                  />
+                  {appLang['features.purchaseScreenMessages.sellingPrice']}
                 </TableCell>
-                <TableCell>{row.total.toFixed(2)}</TableCell>
                 <TableCell>
-                  <IconButton onClick={() => deleteItemRow(row.id)}>
-                    <DeleteIcon />
-                  </IconButton>
+                  {appLang['features.purchaseScreenMessages.total']}
+                </TableCell>
+                <TableCell>
+                  {appLang['features.purchaseScreenMessages.action']}
                 </TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      )}
-      {showAddItemButton && (
-        <Grid item xs={12}>
+            </TableHead>
+            <TableBody>
+              {formData.itemRows.map((row) => (
+                <TableRow key={row.id}>
+                  <TableCell>
+                    <TextField
+                      fullWidth
+                      select
+                      required
+                      label="Select Items"
+                      value={row.itemDetail}
+                      onChange={(e) =>
+                        handleItemChange(row.id, 'itemDetail', e.target.value)
+                      }
+                    >
+                      {itemNames.map((itemName, index) => (
+                        <MenuItem
+                          key={index}
+                          value={itemName}
+                          disabled={selectedItemNames.includes(itemName)}
+                        >
+                          {itemName}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  </TableCell>
+                  <TableCell>
+                    <TextField
+                      fullWidth
+                      type="number"
+                      value={row.quantity}
+                      required
+                      onChange={(e) =>
+                        handleItemChange(row.id, 'quantity', e.target.value)
+                      }
+                      InputProps={{ inputProps: { min: 1 } }}
+                      error={formSubmitted && row.quantity == 0}
+                    />
+                    {formSubmitted && row.quantity == 0 && (
+                      <FormHelperText style={{ color: 'red' }}>
+                        Quantity is Required.
+                      </FormHelperText>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <TextField
+                      fullWidth
+                      type="number"
+                      InputProps={{
+                        readOnly: true,
+                      }}
+                      value={row.purchase_price}
+                      onChange={(e) =>
+                        handleItemChange(
+                          row.id,
+                          'purchase_price',
+                          e.target.value
+                        )
+                      }
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <TextField
+                      fullWidth
+                      type="number"
+                      InputProps={{
+                        readOnly: true,
+                      }}
+                      value={row.sale_price}
+                      onChange={(e) =>
+                        handleItemChange(row.id, 'sale_price', e.target.value)
+                      }
+                    />
+                  </TableCell>
+                  <TableCell>{row.total.toFixed(2)}</TableCell>
+                  <TableCell>
+                    <IconButton onClick={() => deleteItemRow(row.id)}>
+                      <DeleteIcon />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
           <Box className="addItemContainer">
             <Button
               onClick={addItemRow}
@@ -351,12 +626,12 @@ const PurchaseScreen: React.FC = () => {
             </Button>
           </Box>
         </Grid>
-      )}
+      </Grid>
       <Grid container spacing={3}>
         <Grid item xs={12} md={6}>
           <FormControl fullWidth margin="normal">
             <InputLabel id="payment-mode-label">
-              {langEN['features.common.purchaseMessages'].paymentMode}
+              {appLang['features.purchaseScreenMessages.paymentMode']}
             </InputLabel>
             <Select
               labelId="payment-mode-label"
@@ -367,13 +642,13 @@ const PurchaseScreen: React.FC = () => {
               }
             >
               <MenuItem value="Cash">
-                {langEN['features.common.purchaseMessages'].cash}
+                {appLang['features.purchaseScreenMessages.cash']}
               </MenuItem>
               <MenuItem value="Card">
-                {langEN['features.common.purchaseMessages'].card}
+                {appLang['features.purchaseScreenMessages.card']}
               </MenuItem>
               <MenuItem value="UPI">
-                {langEN['features.common.purchaseMessages'].upi}
+                {appLang['features.purchaseScreenMessages.upi']}
               </MenuItem>
             </Select>
           </FormControl>
@@ -401,6 +676,7 @@ const PurchaseScreen: React.FC = () => {
                 value={formData.discountValue}
                 onChange={handleDiscountValueChange}
                 margin="normal"
+                InputProps={{ inputProps: { min: 0 } }}
               />
             </Grid>
           </Grid>
@@ -414,12 +690,19 @@ const PurchaseScreen: React.FC = () => {
               setFormData({ ...formData, paidAmount: e.target.value })
             }
             margin="normal"
+            required
+            error={formSubmitted && !formData.paidAmount}
           />
+          {formSubmitted && !formData.paidAmount && (
+            <FormHelperText style={{ color: 'red' }}>
+              Paid Amount is required.
+            </FormHelperText>
+          )}
         </Grid>
         <Grid item xs={12} md={10}>
           <Typography variant="h6" className="totalAmountText">
-            {langEN['features.common.purchaseMessages'].totalAmountLabel}{' '}
-            {(totalAmount - formData.discountValue).toFixed(2)}
+            {appLang['features.purchaseScreenMessages.totalAmountLabel']}{' '}
+            {totalAmount.toFixed(2)}
           </Typography>
         </Grid>
 
@@ -459,9 +742,8 @@ const PurchaseScreen: React.FC = () => {
       />
       <DraftsDialog
         open={openDraftsModal}
-        onClose={handleDraftsModalClose}
-        drafts={drafts}
-        deleteDraft={deleteDraft}
+        onClose={() => setOpenDraftsModal(false)}
+        apiEndpoint="http://localhost:8000/api/draft-transactions?txn_type=Purchase"
       />
     </Box>
   )
