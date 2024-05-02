@@ -1,7 +1,7 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import CommonTable, { Column } from '../common/CommonTable/CommonTable'
-import { Button } from '@mui/material'
-import lang from '../../lang-en.json'
+import { AppLangContext } from '@Contexts'
+
 function createData(
   vendorName: string,
   totalAmount: number,
@@ -13,6 +13,7 @@ function createData(
 }
 
 const Deposits: React.FC = () => {
+  const { appLang } = useContext(AppLangContext)
   const rows = [
     createData('Ashwin', 3200, 2000, 50, 1150),
     createData('Siraj', 2000, 1000, 200, 800),
@@ -35,7 +36,7 @@ const Deposits: React.FC = () => {
   return (
     <>
       <div className="heading">
-        <h1>{lang['feature.report.headings'][2]}</h1>
+        <h1>{appLang['feature.deposits.heading']}</h1>
       </div>
       <CommonTable rows={rows} columns={columns} />
     </>
