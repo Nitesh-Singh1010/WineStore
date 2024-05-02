@@ -161,7 +161,7 @@ const SignInScreen: React.FC<ISignInScreenProps> = ({}) => {
           </form>
         </CardContent>
       </Card>
-      <Card>
+      {/* <Card>
         <CardContent>
           <span>
             {
@@ -178,7 +178,7 @@ const SignInScreen: React.FC<ISignInScreenProps> = ({}) => {
             {appLang['feature.authScreen.signInForm.footer.signUpLink.text']}
           </Link>
         </CardContent>
-      </Card>
+      </Card> */}
     </div>
   )
 }

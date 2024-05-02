@@ -66,18 +66,19 @@
                 }
             }
         }
-        &:last-of-type {
-            width: 27.5rem;
-            & > .MuiCardContent-root {
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-                padding: 0.5rem 1rem;
-                & > .MuiButton-root {
-                    text-transform: none;
-                    padding: 0 0.25rem;
-                }
-            }
-        }
+        // This is for sign up card below login card
+        // &:last-of-type {
+        //     width: 27.5rem;
+        //     & > .MuiCardContent-root {
+        //         display: flex;
+        //         align-items: center;
+        //         gap: 0.5rem;
+        //         padding: 0.5rem 1rem;
+        //         & > .MuiButton-root {
+        //             text-transform: none;
+        //             padding: 0 0.25rem;
+        //         }
+        //     }
+        // }
     }
 }
