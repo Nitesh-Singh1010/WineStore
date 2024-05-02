@@ -1,41 +1,33 @@
 {
-  "feature.apiService.domain": "",
-  "feature.root.api.backendService.domainRootPath": "/api",
+  "feature.apiServices.serviceA.domain": "",
+  "feature.apiServices.serviceAEndpoints": {
+    "Endpoint1": "/endpoint-1"
+  },
+  "feature.apiServices.serviceBServiceEndpoints": {
+    "Endpoint1": "/endpoint-1",
+    "Endpoint2": "/endpoint-2"
+  },
+  "feature.apiServices.proxyEndpoint": "/api",
+  "feature.apiServices.retry_threshold": 1,
+  "feature.apiServices.timeout_error_codes": [502, 504, 499],
+  "feature.apiServices.identity_errors": [
+    "Signature has expired",
+    "Invalid token",
+    "Not authenticated"
+  ],
+  "feature.apiServices.alert.apiError.autoCloseTimeout": 8000,
 
-  "feature.mlService.api.timeout_error_codes": [502, 504, 499],
-
-  "feature.api.serverError.alert.autoCloseTimeout": 8000,
-
-  "feature.fileUpload.allowedFileSizeInMB.max": 2,
-  "feature.fileUpload.allowedFilesCount.max": 5,
-  "feature.fileUpload.allowedFileFormat.names": ".pdf, .txt",
-  "feature.fileUpload.allowedTestFileFormat.names": "",
-
-  "feature.userHistory.listItem.selectionLimit.value": null,
-  "feature.userHistory.listItem.visibilityCount.value": 10,
-
-  "feature.summaryGenerationAPi.extraTimeoutInSecs.value": 2.5,
-
-  "feature.mailSystem.allowedDomainNames.list": [
+  "feature.auth.routes": {
+    "signIn": "/sign-in",
+    "signUp": "/sign-up",
+    "forgotPassword": "/forgot-password",
+    "resetPassword": "/reset-password"
+  },
+  "feature.auth.email.allowedDomainNames.list": [
     "microsoft.com",
     "gmail.com",
     "wolterskluwer.com",
     "yahoo.com"
-  ],
-
-  "feature.root.api.serviceAEndpoints": {
-    "Endpoint1": "/endpoint-1"
-  },
-  "feature.root.api.serviceBServiceEndpoints": {
-    "Endpoint1": "/endpoint-1",
-    "Endpoint2": "/endpoint-2"
-  },
-
-  "feature.root.api.retry_threshold": 1,
-  "feature.root.api.identity_errors": [
-    "Signature has expired",
-    "Invalid token",
-    "Not authenticated"
   ],
 
   "feature.common.navbar.routes.list": [
@@ -48,15 +40,15 @@
       "route": "/route2",
       "title": "TitleB",
       "icon": "IconB"
-    },
-    {
-      "route": "/route3",
-      "title": "TitleC",
-      "icon": "IconC"
     }
   ],
 
   "feature.common.alert.autoCloseTimeout.short": 3000,
   "feature.common.alert.autoCloseTimeout.medium": 5000,
-  "feature.common.alert.autoCloseTimeout.large": 8000
+  "feature.common.alert.autoCloseTimeout.large": 8000,
+
+  "feature.common.fileUpload.allowedFileSizeInMB.max": 2,
+  "feature.common.fileUpload.allowedFilesCount.max": 5,
+  "feature.common.fileUpload.allowedFileFormat.names": ".pdf, .txt",
+  "feature.common.fileUpload.allowedTestFileFormat.names": ""
 }
