@@ -9,7 +9,7 @@
   "feature.common.loader.processing.message": "Processing ...",
 
   "feature.go.button":"Go",
-  "feature.headings":["Transactions","Receivables","Deposits","Inventory"],
+  "feature.inventoryScreen.heading":"Inventory",
   
 
   "feature.common.templates.loadingMessage.text": "Loading ...",

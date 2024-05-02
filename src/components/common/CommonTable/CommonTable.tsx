@@ -1,4 +1,3 @@
-import React, { useState } from 'react'
 import {
   Table,
   TableBody,
@@ -11,9 +10,10 @@ import {
   Paper,
   Chip,
 } from '@mui/material'
-import CustomTablePagination from '../CustomTablePagination/CustomTablePagination'
 import './CommonTable.scss'
+import TablePagination from '@mui/material/TablePagination'
 
+import React, { useState } from 'react'
 export interface Column {
   id: string
   label: string
@@ -93,7 +93,7 @@ const CommonTable: React.FC<CommonTableProps> = ({ rows, columns }) => {
       setPage(jumpToPage - 1)
     } else {
       alert('Invalid Page number.')
-      console.error('Invalid page number')
+      // console.error('Invalid page number')
     }
   }
 
@@ -179,17 +179,14 @@ const CommonTable: React.FC<CommonTableProps> = ({ rows, columns }) => {
               ))}
           </TableBody>
         </Table>
-
-        <CustomTablePagination
-          count={filteredRows.length}
+        <TablePagination
+          rowsPerPageOptions={[5, 10, 25]}
+          component="div"
+          count={rows.length}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
-          handleChangePage={handleChangePage}
-          jumpToPage={jumpToPage}
-          setJumpToPage={setJumpToPage}
-          handleJumpToPage={handleJumpToPage}
         />
       </TableContainer>
     </>
