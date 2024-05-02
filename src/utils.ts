@@ -58,6 +58,19 @@ export const getCookie = (name: string) =>
   document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)')?.pop() || ''
 
 /**
+ * Function to remove a cookie using name
+ * @param name: string
+ * @param options?: CookieOptions
+ */
+export const removeCookie = (name: string, options?: CookieOptions): void => {
+  // Set the expiration date to a past date to remove the cookie
+  const pastExpiration = new Date(0)
+
+  // Call the setCookie function with the past expiration date to remove the cookie
+  setCookie(name, '', { ...options, expires: pastExpiration })
+}
+
+/**
  * Function to set in session storage with key and value
  * @param storageKey: string
  * @param val: any
@@ -87,6 +100,28 @@ export const getSessionStorage = (storageKey: string) => {
 export const removeSessionStorage = (storageKey: string) => {
   sessionStorage.removeItem(`${CONSTANTS.app_identifier}_${storageKey}`)
 }
+
+/**
+ * Function to set in local storage with key and value
+ * @param storageKey: string
+ * @param val: any
+ */
+export const setLocalStorage = (storageKey: string, val: any) =>
+  localStorage.setItem(`${CONSTANTS.app_identifier}_${storageKey}`, val)
+
+/**
+ * Function to get from local storage using key
+ * @param storageKey: string
+ */
+export const getLocalStorage = (storageKey: string) =>
+  localStorage.getItem(`${CONSTANTS.app_identifier}_${storageKey}`)
+
+/**
+ * Function to remove from local storage using key
+ * @param storageKey: string
+ */
+export const removeLocalStorage = (storageKey: string) =>
+  localStorage.removeItem(`${CONSTANTS.app_identifier}_${storageKey}`)
 
 /**
  * Function to validate email using regex

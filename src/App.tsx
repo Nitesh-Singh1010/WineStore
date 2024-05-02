@@ -1,11 +1,13 @@
 import React, { useState } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import './App.scss'
+
 import Spinner, { ISpinnerProps } from '@components/common/Spinner'
-import HomeScreen from '@components/HomeScreen'
+import SignInScreen from '@components/AuthScreens/SignIn'
 import NotFound from '@components/NotFound'
+
 import { AppLangContext, AppStateContext } from '@Contexts'
-import baseVar from './vars.json'
+import baseVars from './vars.json'
 import baseLang from './lang-en.json'
 import PurchaseScreen from '@components/PurchaseScreen'
 
@@ -34,7 +36,7 @@ const App: React.FC = () => {
       {loaderProps.loading && <Spinner label={loaderProps.label} />}
       <AppStateContext.Provider
         value={{
-          appConfig: baseVar,
+          appConfig: baseVars,
           loading: loaderProps.loading,
           setLoader: handleLoaderChange,
         }}
@@ -44,6 +46,10 @@ const App: React.FC = () => {
             <div className="app-container">
               <Routes>
                 <Route path="/purchase" element={<PurchaseScreen />} />
+                <Route
+                  path={baseVars['feature.auth.routes'].signIn}
+                  element={<SignInScreen />}
+                />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </div>

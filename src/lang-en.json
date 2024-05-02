@@ -2,8 +2,19 @@
   "feature.app.serverException.message.text": "Oops, Something went wrong!<br />Please try again later",
   "feature.app.uiException.message.text": "Oops, Something went wrong!<br />Please refresh manually or try again later",
 
-  "feature.loginPage.alert.incorrectInfo.message": "Incorrect username or password!!",
-  "feature.loginPage.alert.compulsoryInfo.message": "Both <b>username</b> & <b>password</b> are mandatory!!",
+  "feature.app.productName.text": "XWines",
+
+  "feature.authScreen.alert.incorrectInfo.message": "Incorrect username or password!!",
+  "feature.authScreen.alert.compulsoryInfo.message": "Both <b>username</b> & <b>password</b> are mandatory!!",
+  "feature.authScreen.signInForm.title.text": "Sign in",
+  "feature.authScreen.signInForm.formField.email.label": "Email",
+  "feature.authScreen.signInForm.formField.email.placeholder": "Email",
+  "feature.authScreen.signInForm.formField.password.label": "Password",
+  "feature.authScreen.signInForm.formField.password.placeholder": "Password",
+  "feature.authScreen.signInForm.formActions.forgotPasswordLink.text": "Forgot Password?",
+  "feature.authScreen.signInForm.formActions.signInButton.text": "Sign In",
+  "feature.authScreen.signInForm.footer.doNotHaveAnAccount.title.text": "Don't have an account?",
+  "feature.authScreen.signInForm.footer.signUpLink.text": "Sign up",
 
   "feature.common.loader.uploadProgress.message": "{{percentCompleted}}% items fetched ...",
   "feature.common.loader.processing.message": "Processing ...",
