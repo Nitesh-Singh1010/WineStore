@@ -81,6 +81,11 @@
   "feature.common.quantityModal.heading":"Add Quantity",
   "feature.common.quantityModal.inputLabel":"Select Unit",
   "feature.common.quantityModal.saveQuantity.button":"Save Quantity",
+  "feature.go.button": "Go",
+  "feature.transaction.heading": "Transactions",
+  "feature.deposits.heading": "Deposits",
+  "feature.receivables.heading": "Receivables",
+
   "feature.common.templates.loadingMessage.text": "Loading ...",
   "feature.common.templates.popups.errorHeading.text": "Error",
   "feature.common.templates.popups.info.dontShowAgain.text": "Do not show this again",

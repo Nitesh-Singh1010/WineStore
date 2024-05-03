@@ -1,3 +1,4 @@
+import React, { useState } from 'react'
 import {
   Table,
   TableBody,
@@ -13,7 +14,7 @@ import {
 import './CommonTable.scss'
 import TablePagination from '@mui/material/TablePagination'
 
-import React, { useState } from 'react'
+
 export interface Column {
   id: string
   label: string
@@ -93,7 +94,7 @@ const CommonTable: React.FC<CommonTableProps> = ({ rows, columns }) => {
       setPage(jumpToPage - 1)
     } else {
       alert('Invalid Page number.')
-      // console.error('Invalid page number')
+      
     }
   }
 

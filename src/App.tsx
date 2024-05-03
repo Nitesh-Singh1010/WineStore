@@ -14,6 +14,7 @@ import SalesScreen from '@components/SalesScreen'
 import Inventory from '@components/InventoryScreen'
 import ItemsScreen from '@components/ItemsScreen'
 import ItemList from '@components/ItemsScreen/ItemsList/ItemList'
+import Reports from '@components/ReportsScreen/Reports'
 
 export interface INavItem {
   disabled?: boolean
@@ -59,6 +60,7 @@ const App: React.FC = () => {
                 <Route path="/inventory" element={< Inventory/>} />
                 <Route path="/items" element={<ItemList />} />
                 <Route path="/items/create" element={<ItemsScreen />} />
+                <Route path="/reports" element={<Reports />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </div>
